@@ -18,6 +18,7 @@ if ($method === 'GET') {
 
     $uid = isset($_GET['user_id']) ? (int)$_GET['user_id'] : null;
     if ($uid) {
+        requireUserAccess($uid);
         $stmt = $db->prepare("
             SELECT br.*, b.Title AS book_title, b.Type AS book_type
             FROM borrow_records br
@@ -29,6 +30,7 @@ if ($method === 'GET') {
         ok($stmt->fetchAll());
     }
 
+    requireAdmin();
     $status = $_GET['status'] ?? 'All';
     $sql = "
         SELECT br.*,
@@ -50,12 +52,13 @@ if ($method === 'GET') {
 
 // ── POST — Borrow a book ──────────────────────────────────────
 elseif ($method === 'POST' && $action !== 'return') {
+    requireBookworm();
     $bookId  = (int)($b['book_id']       ?? 0);
     $name    = trim($b['borrower_name']  ?? $b['name']    ?? '');
     $email   = trim($b['email']          ?? '');
     $contact = trim($b['contact']        ?? '');
     $due     = $b['due_date'] ?? date('Y-m-d', strtotime('+14 days'));
-    $userId  = $b['user_id'] ?? $_SESSION['user_id'] ?? null;
+    $userId  = (int)($_SESSION['user_id'] ?? 0);
 
     if (!$bookId || !$name || !$email) fail('Book, name, and email are required.');
 
@@ -86,6 +89,7 @@ elseif ($method === 'POST' && $action !== 'return') {
 
 // ── POST — Mark Returned ──────────────────────────────────────
 elseif ($method === 'POST' && $action === 'return') {
+    requireAdmin();
     if (!$id) fail('Record ID required.');
 
     $recStmt = $db->prepare("SELECT * FROM borrow_records WHERE id=?");
@@ -108,6 +112,7 @@ elseif ($method === 'POST' && $action === 'return') {
 
 // ── PUT — Update Record (Admin) ───────────────────────────────
 elseif ($method === 'PUT') {
+    requireAdmin();
     if (!$id) fail('Record ID required.');
 
     $name    = trim($b['borrower_name'] ?? $b['name']    ?? '');

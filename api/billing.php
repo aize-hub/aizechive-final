@@ -16,10 +16,12 @@ function fmtDate(?string $d): string {
 if ($method === 'GET') {
     $uid = isset($_GET['user_id']) ? (int)$_GET['user_id'] : null;
     if ($uid) {
+        requireUserAccess($uid);
         $stmt = $db->prepare("SELECT b.*, COALESCE(b.billing_date, DATE(b.created_date)) AS effective_date, bk.Title AS book_title_full, bk.URL AS book_url FROM billing b LEFT JOIN books bk ON bk.idBooks = b.book_id WHERE b.user_id=? AND b.status_of_payment='Paid' AND b.is_active=1 ORDER BY b.idbilling DESC");
         $stmt->execute([$uid]);
         ok($stmt->fetchAll());
     }
+    requireAdmin();
     $status = $_GET['status'] ?? 'All';
     $sql = "SELECT b.*, COALESCE(b.billing_date, DATE(b.created_date)) AS effective_date, bk.Type AS book_type, bk.URL AS book_url FROM billing b LEFT JOIN books bk ON bk.idBooks=b.book_id WHERE b.is_active=1";
     $params = [];
@@ -30,6 +32,7 @@ if ($method === 'GET') {
     ok($stmt->fetchAll());
 }
 elseif ($method === 'POST') {
+    requireBookworm();
     $bookId    = (int)($b['book_id']         ?? 0);
     $name      = trim($b['member_name']       ?? $b['name']  ?? '');
     $email     = trim(strtolower($b['member_email'] ?? $b['email'] ?? ''));
@@ -38,7 +41,7 @@ elseif ($method === 'POST') {
     $ref       = trim($b['reference_number']  ?? $b['ref']   ?? '');
     $amount    = (float)($b['amount']         ?? 0);
     $date      = fmtDate($b['billing_date']   ?? null);   // ← always zero-padded
-    $userId    = $b['user_id']                ?? $_SESSION['user_id'] ?? null;
+    $userId    = (int)($_SESSION['user_id'] ?? 0);
     $bookTitle = trim($b['book_title']        ?? '');
 
     if (!$name || !$email) fail('Name and email are required.');
@@ -76,6 +79,7 @@ elseif ($method === 'POST') {
     ok(['id'=>$db->lastInsertId(),'reference_number'=>$ref],'Payment recorded! Ref: '.$ref);
 }
 elseif ($method === 'PUT') {
+    requireAdmin();
     if (!$id) fail('Billing ID required.');
     $name   = trim($b['member_name']      ?? '');
     $bkttl  = trim($b['book_title']       ?? '');
@@ -96,6 +100,7 @@ elseif ($method === 'PUT') {
     ok([],'Billing record updated.');
 }
 elseif ($method === 'DELETE') {
+    requireAdmin();
     if (!$id) fail('Billing ID required.');
     $db->prepare("UPDATE billing SET is_active=0 WHERE idbilling=?")->execute([$id]);
     ok([],'Billing record deleted.');

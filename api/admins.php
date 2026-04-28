@@ -11,6 +11,8 @@ $b      = body();
 $id     = (int)($b['id'] ?? $_GET['id'] ?? 0);
 $db     = getDB();
 
+requireAdmin();
+
 // ── GET ───────────────────────────────────────────────────────
 if ($method === 'GET') {
     $stmt = $db->query("

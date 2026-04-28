@@ -18,6 +18,7 @@ if ($method === 'GET') {
     ok($stmt->fetchAll());
 }
 elseif ($method === 'POST') {
+    requireAdmin();
     $title  = trim($b['Title']    ?? $b['title']   ?? '');
     $author = trim($b['Author']   ?? $b['author']  ?? '');
     $cat    = trim($b['Category'] ?? $b['cat']     ?? 'General');
@@ -40,6 +41,7 @@ elseif ($method === 'POST') {
     ok(['id'=>$db->lastInsertId()],'Book added successfully.');
 }
 elseif ($method === 'PUT') {
+    requireAdmin();
     if (!$id) fail('Book ID is required.');
     $title  = trim($b['Title']    ?? $b['title']   ?? '');
     $author = trim($b['Author']   ?? $b['author']  ?? '');
@@ -66,6 +68,7 @@ elseif ($method === 'PUT') {
     ok([],'Book updated.');
 }
 elseif ($method === 'DELETE') {
+    requireAdmin();
     if (!$id) fail('Book ID is required.');
     $db->prepare("UPDATE books SET is_active=0 WHERE idBooks=?")->execute([$id]);
     ok([],'Book removed from inventory.');

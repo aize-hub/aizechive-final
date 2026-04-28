@@ -35,6 +35,7 @@ CREATE TABLE books (
   Type         ENUM('Physical','Digital') DEFAULT 'Physical',
   Barcode      VARCHAR(60)  DEFAULT NULL,
   URL          VARCHAR(255) DEFAULT NULL,
+  cover_url    VARCHAR(255) DEFAULT NULL,
   Status       ENUM('Available','Borrowed') DEFAULT 'Available',
   stocks       INT          DEFAULT 1,
   price        DECIMAL(10,2) DEFAULT 0.00,
@@ -83,4 +84,4 @@ CREATE TABLE billing (
 -- ── DEMO DATA ────────────────────────────────────────────────
 -- Admin password = "admin123"
 INSERT INTO admin (username, password) VALUES
-('superadmin', 'admin123');
+('superadmin', '$2y$10$97zFNJlict0y2chrQmDNVu.RbmH8Csp6EeYYVhFFDtC2eT8xJYsma');

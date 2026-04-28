@@ -360,7 +360,7 @@ tr.row-overdue:hover{background:rgba(192,57,43,.18)!important}
 /* EDIT MEMBER / BILLING / ADMIN */
 #modal-edit-member .mbox,#modal-edit-billing .mbox,#modal-edit-admin .mbox{width:min(92vw,500px)}
 
-/* XENDIT PAYMENT */
+/* PAYMENT OPTIONS */
 .xpay-opt{background:var(--cream);border:2px solid var(--soil3);box-shadow:2px 2px 0 var(--soil3);padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;font-family:'VT323',monospace;font-size:16px;color:var(--soil3);transition:all .1s}
 .xpay-opt:hover{background:var(--hay);transform:translate(-1px,-2px);box-shadow:3px 4px 0 var(--soil3)}
 .xpay-opt.sel{background:var(--teal);color:white;border-color:var(--teal2)}
@@ -760,7 +760,7 @@ tr.row-overdue:hover{background:rgba(192,57,43,.18)!important}
       </select>
     </div>
     <div style="background:linear-gradient(135deg,#edf7e0,#d4efc4);border:2px solid var(--grass);padding:10px 14px;font-family:'VT323',monospace;font-size:15px;color:var(--soil2);margin-bottom:10px;line-height:1.6">
-      <strong>✅ Auto-Billing:</strong> eBook payments are <strong>automatically confirmed as PAID</strong> when a bookworm submits their reference number. A unique ref code is generated per transaction. In a real Xendit integration, this is confirmed via webhook from Xendit's servers instantly.
+      <strong>✅ Auto-Billing:</strong> eBook payments are <strong>automatically confirmed as PAID</strong> when a bookworm submits their reference number. A unique ref code is generated per transaction.
     </div>
     <div class="pills" id="bil-pills"></div>
     <div class="twrap"><div class="ttoolbar"><input class="pinput" placeholder="🔍 Search billing..." oninput="filtTbl(this,'biltbl')"/></div>
@@ -864,10 +864,10 @@ tr.row-overdue:hover{background:rgba(192,57,43,.18)!important}
 </div>
 </div>
 
-<!-- EBOOK PAYMENT MODAL — Xendit Demo -->
+<!-- EBOOK PAYMENT MODAL -->
 <div class="mbg" id="modal-ebook">
 <div class="mbox" style="width:min(92vw,540px)">
-  <div class="mhead" style="background:var(--teal2)"><span>🌙 Buy eBook — Xendit Checkout</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-ebook')">✕</button></div>
+  <div class="mhead" style="background:var(--teal2)"><span>🌙 Buy eBook — Checkout</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-ebook')">✕</button></div>
   <div class="mbody" style="padding:0">
     <!-- Step 1: Book + buyer info -->
     <div id="eb-step-1">
@@ -890,17 +890,17 @@ tr.row-overdue:hover{background:rgba(192,57,43,.18)!important}
       </div>
       <div class="mfoot"><button class="pbtn r" onclick="closeM('modal-ebook')">Cancel</button><button class="pbtn t" onclick="ebStep2()">Next: Choose Payment →</button></div>
     </div>
-    <!-- Step 2: Xendit payment method selection -->
+    <!-- Step 2: Payment method selection -->
     <div id="eb-step-2" style="display:none">
       <div style="background:var(--soil3);padding:12px 18px;border-bottom:3px solid var(--soil3);display:flex;align-items:center;justify-content:space-between">
         <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--hay)">SELECT PAYMENT METHOD</div>
         <div style="font-family:'VT323',monospace;font-size:18px;color:var(--gold)">₱<span id="eb-amount-disp2">0</span></div>
       </div>
       <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
-        <div style="font-size:6px;color:var(--soil2);letter-spacing:.5px;margin-bottom:2px">POWERED BY XENDIT</div>
+        
         <!-- E-Wallet options -->
         <div style="font-family:'VT323',monospace;font-size:14px;color:var(--wood);margin-bottom:4px">E-Wallets</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="xendit-wallets">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="ebook-wallets">
           <div class="xpay-opt" onclick="selectXMethod('gcash','GCash')" data-m="GCash">
             <div style="font-size:20px">💚</div><div>GCash</div>
           </div>
@@ -929,7 +929,7 @@ tr.row-overdue:hover{background:rgba(192,57,43,.18)!important}
       </div>
       <div class="mfoot"><button class="pbtn b" onclick="ebBack1()">← Back</button><button class="pbtn t" id="eb-proceed-btn" onclick="ebStep3()" disabled style="opacity:.4">Pay Now →</button></div>
     </div>
-    <!-- Step 3: Fake Xendit checkout UI -->
+    <!-- Step 3: Checkout details -->
     <div id="eb-step-3" style="display:none">
       <div style="background:var(--soil3);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--soil3)">
         <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--hay)" id="eb-method-label">GCash</div>
@@ -1983,7 +1983,7 @@ async function processPayment(){
   }, 1800);
 }
 
-/* ══ XENDIT STEP HELPERS ══ */
+/* ══ PAYMENT STEP HELPERS ══ */
 let selectedXMethod='';
 function ebStep2(){
   const n=v('eb-name'),e=v('eb-email'),c=v('eb-contact');
