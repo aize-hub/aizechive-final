@@ -1,0 +1,2938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AizeChive — Smart Digital Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --sky1:#5ba8d4;--sky2:#7ecef4;--sky3:#b8e4f0;
+  --grass:#5aad2a;--grass2:#4a8e20;--grass3:#3d7518;
+  --soil:#8B5E3C;--soil2:#6b4526;--soil3:#3b2510;
+  --hay:#f0d070;--hay2:#e0b840;--hay3:#b8962a;
+  --wood:#a0643c;--wood2:#7a4a26;
+  --cream:#fdf6e3;--cream2:#ede0c0;--cream3:#d4c090;
+  --gp:#2d5e1e;--gp2:#1e4010;
+  --gb:#4a8e20;--gb2:#3d7518;
+  --bp:#7a4a26;--bp2:#5c3318;
+  --teal:#2e8b7a;--teal2:#1e6b5a;
+  --red:#c0392b;--red2:#922b21;
+  --blue:#3498db;--blue2:#2177b0;
+  --gold:#f1c40f;--gold2:#d4ac0d;
+  --orange:#e67e22;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Press Start 2P',monospace;background:var(--sky1);min-height:100vh;overflow-x:hidden}
+::-webkit-scrollbar{width:10px}
+::-webkit-scrollbar-track{background:var(--soil2)}
+::-webkit-scrollbar-thumb{background:var(--hay2);border:2px solid var(--soil3)}
+
+/* SKY */
+#skybg{position:fixed;inset:0;background:linear-gradient(180deg,#4a98c4 0%,var(--sky2) 50%,var(--sky3) 100%);z-index:0;pointer-events:none}
+.cloud{position:fixed;z-index:1;pointer-events:none;animation:cfloat linear infinite}
+@keyframes cfloat{from{transform:translateX(-220px)}to{transform:translateX(110vw)}}
+#gstrip{position:fixed;bottom:0;left:0;right:0;height:86px;z-index:5;pointer-events:none}
+.g-grass{height:22px;background:repeating-linear-gradient(90deg,var(--grass) 0,var(--grass) 11px,var(--grass2) 11px,var(--grass2) 22px,var(--grass3) 22px,var(--grass3) 26px,var(--grass2) 26px,var(--grass2) 33px);border-top:3px solid var(--soil3)}
+.g-soil{height:64px;background:repeating-linear-gradient(90deg,var(--hay) 0,var(--hay) 15px,var(--hay2) 15px,var(--hay2) 17px,var(--hay) 17px,var(--hay) 33px,var(--hay3) 33px,var(--hay3) 35px);border-top:3px solid var(--soil3)}
+
+/* HEADER */
+header{position:relative;z-index:20;background:var(--wood2);border-bottom:5px solid var(--soil3);box-shadow:0 5px 0 var(--soil3);padding:0 20px;display:flex;align-items:stretch;min-height:64px}
+.hdr-logo{display:flex;align-items:center;gap:10px;padding:10px 18px 10px 0;border-right:3px solid rgba(255,255,255,.12)}
+.hdr-logo-title{font-size:11px;color:var(--hay);text-shadow:2px 2px 0 var(--soil3);letter-spacing:2px;line-height:1.5}
+.hdr-logo-sub{font-family:'VT323',monospace;font-size:13px;color:var(--cream2);opacity:.75}
+nav{display:flex;align-items:stretch;justify-content:center;gap:0;padding:0 6px}
+.nbtn{font-family:'Press Start 2P',monospace;font-size:8px;background:transparent;color:var(--cream2);border:none;box-shadow:none;padding:0 18px;cursor:pointer;text-decoration:none;display:flex;align-items:center;transition:all .1s;position:relative;letter-spacing:.5px;white-space:nowrap}
+.nbtn::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:3px;background:transparent;transition:background .1s}
+.nbtn:hover{background:rgba(255,255,255,.06);color:var(--hay)}
+.nbtn.on{background:rgba(255,255,255,.1);color:var(--hay)}
+.nbtn.on::after{background:var(--hay2)}
+.nbtn.admin-only{display:none}
+.hdr-right{display:flex;align-items:center;gap:10px;padding:10px 0 10px 18px;border-left:3px solid rgba(255,255,255,.12)}
+.role-badge{font-family:'VT323',monospace;font-size:17px;padding:5px 12px;border:2px solid var(--soil3);box-shadow:2px 2px 0 var(--soil3)}
+.role-badge.user-badge{background:var(--grass);color:var(--cream)}
+.role-badge.admin-badge{background:var(--gold);color:var(--soil3)}
+
+/* global search */
+.gsearch-wrap{display:flex;align-items:center;gap:6px;padding:0 12px;border-right:2px solid rgba(255,255,255,.1)}
+.gsearch-inp{font-family:'VT323',monospace;font-size:17px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.15);padding:5px 10px;color:var(--hay);outline:none;width:160px;transition:all .15s}
+.gsearch-inp::placeholder{color:rgba(255,255,255,.4);font-size:15px}
+.gsearch-inp:focus{background:rgba(255,255,255,.18);width:200px;border-color:var(--hay2)}
+#gsearch-results{position:absolute;top:68px;left:0;right:0;background:var(--cream);border:3px solid var(--soil3);box-shadow:5px 5px 0 var(--soil3);z-index:300;max-height:320px;overflow-y:auto;display:none}
+#gsearch-results.show{display:block}
+.gs-item{padding:10px 14px;border-bottom:1px solid var(--cream2);cursor:pointer;display:flex;align-items:center;gap:10px;transition:background .1s}
+.gs-item:hover{background:var(--hay)}
+.gs-item-icon{font-size:18px;flex-shrink:0}
+.gs-item-title{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--soil3);margin-bottom:2px}
+.gs-item-sub{font-family:'VT323',monospace;font-size:14px;color:var(--wood)}
+.gs-none{padding:14px;text-align:center;font-family:'VT323',monospace;font-size:18px;color:var(--wood)}
+
+@media(max-width:700px){
+  header{flex-wrap:wrap;min-height:unset;padding:10px 14px;gap:8px}
+  .hdr-logo{border-right:none;padding-right:0}
+  nav{justify-content:flex-start;flex-wrap:wrap;gap:4px;padding:0}
+  .nbtn{padding:8px 12px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.12);font-size:7px}
+  .nbtn.on{background:var(--hay2);color:var(--soil3)}
+  .nbtn::after{display:none}
+  .hdr-right{border-left:none;padding-left:0;flex-wrap:wrap;margin-left:0!important;width:100%}
+  .gsearch-wrap{border-right:none;padding:0}
+  .gsearch-inp{width:100px}
+  .atabs{gap:4px}
+  .atab{font-size:5.5px!important;padding:8px 8px!important}
+  .admin-stat-cards{grid-template-columns:repeat(2,1fr)}
+  .bw-cards{grid-template-columns:repeat(2,1fr)}
+  .shdr{flex-wrap:wrap;gap:8px}
+  .stitle,.stitle-dk{font-size:7px!important}
+  .tscroll{-webkit-overflow-scrolling:touch}
+  .pills{gap:5px}
+  .pill{font-size:5px;padding:4px 8px}
+}
+@media(max-width:420px){
+  .admin-stat-cards{grid-template-columns:1fr 1fr}
+  .atab{font-size:5px!important;padding:6px 6px!important}
+  .cgrid{grid-template-columns:1fr}
+}
+
+/* APP */
+#app{position:relative;z-index:10;max-width:1150px;margin:0 auto;padding:22px 18px 110px}
+.page{display:none;animation:pgIn .15s ease}.page.on{display:block}@keyframes pgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#4a98c4 0%,var(--sky2) 50%,var(--sky3) 100%)}
+.login-box{background:var(--cream);border:5px solid var(--soil3);box-shadow:8px 8px 0 var(--soil3);width:min(92vw,460px);max-height:92vh;overflow-y:auto;animation:popIn .2s ease;overflow-x:hidden}
+@keyframes popIn{from{transform:scale(.8) translateY(30px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.login-head{background:var(--wood2);padding:18px 20px;border-bottom:4px solid var(--soil3);text-align:center}
+.login-logo{font-size:clamp(20px,5vw,32px);color:var(--hay);text-shadow:3px 3px 0 var(--soil3);letter-spacing:2px;margin-bottom:4px}
+.login-sub{font-family:'VT323',monospace;font-size:18px;color:var(--cream2);opacity:.9}
+.login-body{padding:24px 22px}
+.login-who{font-size:8px;color:var(--soil2);text-align:center;margin-bottom:18px;letter-spacing:.5px}
+.login-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+.login-role{border:3px solid var(--soil3);box-shadow:0 5px 0 var(--soil3);padding:20px 10px;text-align:center;cursor:pointer;transition:all .1s;position:relative;top:0}
+.login-role:hover{top:3px;box-shadow:0 2px 0 var(--soil3)}
+.login-role:active{top:5px;box-shadow:none}
+.login-role.u{background:linear-gradient(160deg,#3a9a7a,#1e6b5a)}
+.login-role.a{background:linear-gradient(160deg,#c47a3a,#7a4020)}
+.login-role-icon{font-size:32px;display:block;margin-bottom:8px;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.3))}
+.login-role-label{font-size:8px;color:var(--hay);text-shadow:2px 2px 0 rgba(0,0,0,.4)}
+.login-role-sub{font-family:'VT323',monospace;font-size:15px;color:rgba(255,255,255,.7);margin-top:4px}
+#admin-login-form{display:none;border-top:2px solid var(--cream2);padding-top:16px;margin-top:4px}
+.frow{margin-bottom:12px}
+.flbl{display:block;font-size:6px;color:var(--soil2);margin-bottom:5px;letter-spacing:.8px;text-transform:uppercase}
+.finp{font-family:'VT323',monospace;font-size:19px;background:var(--cream);border:2px solid var(--soil3);box-shadow:inset 2px 2px 0 var(--cream2);padding:8px 10px;color:var(--soil3);outline:none;width:100%;transition:all .1s}
+.finp:focus{background:var(--hay);border-color:var(--hay2)}
+.fsel{font-family:'VT323',monospace;font-size:19px;background:var(--cream);border:2px solid var(--soil3);box-shadow:inset 2px 2px 0 var(--cream2);padding:8px 10px;color:var(--soil3);outline:none;width:100%;cursor:pointer;transition:all .1s}
+.fsel:focus{background:var(--hay);border-color:var(--hay2)}
+.login-err{font-family:'VT323',monospace;font-size:16px;color:var(--red);margin-top:8px;display:none}
+.login-hint{font-family:'VT323',monospace;font-size:14px;color:var(--wood);margin-top:6px;text-align:center}
+
+/* HOME */
+.home-title{font-size:clamp(28px,7vw,64px);color:var(--soil3);text-shadow:4px 4px 0 var(--hay2),7px 7px 0 var(--soil3);text-align:center;margin:26px 0 18px;letter-spacing:3px}
+.sbar{background:var(--grass2);border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:8px 16px;display:flex;align-items:center;gap:14px;font-family:'VT323',monospace;font-size:20px;color:var(--cream);margin-bottom:20px;flex-wrap:wrap}
+.sbar .chip{background:var(--soil2);border:2px solid var(--soil3);padding:3px 10px;font-size:14px;color:var(--hay);flex-shrink:0}
+.cpanel{background:var(--gp);border:4px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:16px 18px 20px;margin-bottom:22px}
+.ctitle{font-size:8px;color:var(--hay);text-align:center;margin-bottom:16px;letter-spacing:1px}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:560px){.cgrid{grid-template-columns:1fr}#home-stats-row{grid-template-columns:1fr}}
+.ccard{border:4px solid var(--soil3);box-shadow:0 6px 0 var(--soil3);padding:28px 18px 20px;text-align:center;cursor:pointer;transition:transform .1s,box-shadow .1s}
+.ccard.phy{background:linear-gradient(155deg,#c47a3a,#9a5828 55%,#7a4020)}
+.ccard.dig{background:linear-gradient(155deg,#3a9a7a,#277a60 55%,#1a5a48)}
+.ccard:hover{transform:translate(-3px,-4px);box-shadow:0 10px 0 var(--soil3)}
+.ccard:active{transform:translate(2px,2px);box-shadow:0 2px 0 var(--soil3)}
+.ccard.sel{border-color:var(--hay);box-shadow:0 6px 0 var(--hay3)}
+.cicon{font-size:44px;display:block;margin-bottom:10px;filter:drop-shadow(3px 3px 0 rgba(0,0,0,.4));transition:transform .15s}
+.ccard:hover .cicon{transform:scale(1.15) rotate(-5deg)}
+.clabel{font-size:9px;color:var(--hay);text-shadow:2px 2px 0 rgba(0,0,0,.5);margin-bottom:6px}
+.csub{font-family:'VT323',monospace;font-size:17px;color:rgba(255,255,255,.75);margin-bottom:6px}
+.ccnt{display:inline-block;font-size:7px;color:var(--hay);background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.2);padding:5px 14px;margin-bottom:4px}
+.cavail{display:block;font-family:'VT323',monospace;font-size:15px;color:rgba(255,255,255,.7);margin-top:4px}
+
+/* alert banner */
+.alert-banner{background:linear-gradient(135deg,var(--red),var(--red2));border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:10px 16px;margin-bottom:18px;display:flex;align-items:center;gap:10px;font-family:'VT323',monospace;font-size:18px;color:white}
+.alert-banner-icon{font-size:22px;flex-shrink:0}
+
+/* LIBRARY */
+.liblayout{display:grid;grid-template-columns:1fr 260px;gap:16px;align-items:start}
+@media(max-width:860px){.liblayout{grid-template-columns:1fr}}
+
+/* TABLES */
+.twrap{overflow:hidden;border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3)}
+.tscroll{overflow-x:auto}
+.ttoolbar{background:var(--bp);padding:10px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;border-bottom:3px solid var(--soil3)}
+.pinput{font-family:'VT323',monospace;font-size:18px;background:var(--cream);border:2px solid var(--soil3);box-shadow:inset 2px 2px 0 var(--cream2);padding:6px 10px;color:var(--soil3);outline:none;width:200px;transition:all .1s}
+.pinput:focus{background:var(--hay);border-color:var(--hay2);width:220px}
+.pinput::placeholder{color:var(--wood2);opacity:.65}
+table{width:100%;border-collapse:collapse;min-width:500px}
+thead{background:var(--soil3)}
+thead th{font-size:6px;color:var(--hay);text-align:left;padding:10px 12px;border-right:2px solid rgba(255,255,255,.08);letter-spacing:.8px;text-transform:uppercase;white-space:nowrap}
+thead th:last-child{border-right:none}
+tbody tr{border-bottom:2px solid var(--cream2);transition:background .12s}
+tbody tr{transition:background .12s,transform .05s}tbody tr:hover{background:rgba(240,208,112,.35)!important}
+tbody tr:nth-child(odd){background:var(--cream)}
+tbody tr:nth-child(even){background:var(--cream2)}
+tbody td{font-family:'VT323',monospace;font-size:17px;color:var(--soil3);padding:9px 12px;border-right:1px solid var(--cream3);vertical-align:middle;white-space:nowrap}
+tbody td:last-child{border-right:none}
+.tdm{font-family:'Press Start 2P',monospace!important;font-size:7px!important;color:var(--soil3)!important;line-height:1.7;white-space:normal}
+.tds{font-family:'VT323',monospace;font-size:14px;color:var(--wood);margin-top:2px}
+.td-wrap{white-space:normal!important}
+
+/* BADGES */
+.bdg{display:inline-flex;align-items:center;gap:4px;font-size:6px;padding:4px 10px;border:2px solid var(--soil3);box-shadow:2px 2px 0 var(--soil3);font-family:'Press Start 2P',monospace;white-space:nowrap}
+.bdg.av{background:var(--grass);color:var(--cream)}.bdg.av::before{content:'●';font-size:8px}
+.bdg.bw{background:var(--hay2);color:var(--soil3)}.bdg.bw::before{content:'●';font-size:8px;color:var(--soil2)}
+.bdg.pd{background:var(--teal);color:var(--cream)}.bdg.pd::before{content:'✓';font-size:9px}
+.bdg.pn{background:var(--hay3);color:var(--cream)}.bdg.pn::before{content:'◌';font-size:9px}
+.bdg.od{background:var(--red);color:var(--cream)}.bdg.od::before{content:'!';font-size:9px}
+.bdg.ac{background:var(--grass);color:var(--cream)}.bdg.ac::before{content:'●';font-size:8px}
+.bdg.in{background:var(--soil2);color:var(--cream2)}.bdg.in::before{content:'○';font-size:8px}
+.bdg.rt{background:var(--blue);color:var(--cream)}.bdg.rt::before{content:'✓';font-size:9px}
+.bdg.phy{background:var(--bp);color:var(--hay)}
+.bdg.dig{background:var(--teal2);color:var(--cream)}
+
+/* BUTTONS */
+.pbtn{font-family:'Press Start 2P',monospace;font-size:7px;border:3px solid var(--soil3);box-shadow:0 4px 0 var(--soil3);padding:9px 14px;cursor:pointer;transition:transform .08s,box-shadow .08s;white-space:nowrap;letter-spacing:.3px}
+.pbtn:hover{transform:translateY(2px);box-shadow:0 2px 0 var(--soil3)}
+.pbtn:active{transform:translateY(4px);box-shadow:none}
+.pbtn.g{background:var(--gb);color:var(--cream)}.pbtn.g:hover{background:var(--gb2)}
+.pbtn.b{background:var(--bp);color:var(--hay)}.pbtn.b:hover{background:var(--bp2)}
+.pbtn.h{background:var(--hay);color:var(--soil3)}.pbtn.h:hover{background:var(--hay2)}
+.pbtn.r{background:var(--red);color:var(--cream)}.pbtn.r:hover{background:var(--red2)}
+.pbtn.t{background:var(--teal);color:var(--cream)}.pbtn.t:hover{background:var(--teal2)}
+.pbtn.bl{background:var(--blue);color:var(--cream)}.pbtn.bl:hover{background:var(--blue2)}
+.pbtn.gold{background:var(--gold);color:var(--soil3)}.pbtn.gold:hover{background:var(--gold2)}
+.ibtn{width:32px;height:32px;font-size:14px;display:inline-grid;place-items:center;border:2px solid var(--soil3);box-shadow:2px 3px 0 var(--soil3);cursor:pointer;background:var(--cream);transition:all .08s}
+.ibtn:hover{transform:translate(-1px,-2px);box-shadow:3px 4px 0 var(--soil3);background:var(--hay)}
+.ibtn:active{transform:translate(1px,1px);box-shadow:none}
+.actrow{display:flex;gap:5px;flex-wrap:nowrap;align-items:center}
+
+/* BACK BTN */
+#backbtn{position:fixed;bottom:22px;right:22px;z-index:50;font-family:'Press Start 2P',monospace;font-size:8px;background:var(--gp);color:var(--hay);border:3px solid var(--soil3);box-shadow:0 5px 0 var(--soil3);padding:11px 18px;cursor:pointer;transition:transform .08s,box-shadow .08s;display:none;letter-spacing:.5px}
+#backbtn.show{display:block}
+#backbtn:hover{transform:translateY(3px);box-shadow:0 2px 0 var(--soil3)}
+
+/* SIDEBAR */
+.sidebar{display:flex;flex-direction:column;gap:14px}
+.sw{background:var(--gp);border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:14px}
+.sw-title{font-size:6px;color:var(--hay);letter-spacing:1px;margin-bottom:10px;opacity:.85}
+.sw .pinput{width:100%;display:block;margin-bottom:9px;font-size:17px}
+.sfrow{display:flex;gap:6px}
+.sfrow .pbtn{flex:1;text-align:center;font-size:6px;padding:7px 4px}
+.smini{background:var(--cream);border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:14px;display:flex;align-items:center;gap:12px}
+.smini-icon{font-size:28px;flex-shrink:0;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.15))}
+.smini-lbl{font-size:5px;color:var(--wood2);margin-bottom:5px;letter-spacing:1px;text-transform:uppercase}
+.smini-val{font-family:'Press Start 2P',monospace;font-size:22px;color:var(--soil3);line-height:1}
+.smini-sub{font-family:'VT323',monospace;font-size:15px;color:var(--grass2);margin-top:4px}
+.qswrap{background:var(--cream);border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:14px}
+.qstitle{font-size:6px;color:var(--soil2);margin-bottom:12px;letter-spacing:.5px}
+.qrow{margin-bottom:8px}
+.qlbl{font-family:'VT323',monospace;font-size:15px;color:var(--soil2);display:flex;justify-content:space-between;margin-bottom:3px}
+.qtrack{background:var(--cream2);border:2px solid var(--soil3);height:10px;overflow:hidden}
+.qfill{height:100%;transition:width .4s ease}
+
+/* member history panel */
+.mem-history{background:var(--cream);border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:14px;margin-top:14px;display:none}
+.mem-history.show{display:block}
+.mh-title{font-size:7px;color:var(--soil3);margin-bottom:10px;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.mh-item{background:var(--cream2);border:2px solid var(--soil3);padding:8px 12px;margin-bottom:6px;font-family:'VT323',monospace;font-size:16px;color:var(--soil3)}
+.mh-book{font-family:'Press Start 2P',monospace;font-size:7px;color:var(--soil3);margin-bottom:3px}
+.mh-meta{font-size:14px;color:var(--wood);display:flex;gap:10px;flex-wrap:wrap}
+
+/* TABS */
+.tabrow{display:flex;gap:3px;flex-wrap:wrap}
+.tbtn{font-size:7px;background:var(--gp2);color:var(--cream2);border:3px solid var(--soil3);border-bottom:none;padding:9px 14px;cursor:pointer;position:relative;top:3px;transition:all .1s;letter-spacing:.3px}
+.tbtn:hover{background:var(--gp);color:var(--hay)}
+.tbtn.on{background:var(--cream);color:var(--soil3);border-bottom:3px solid var(--cream);z-index:2}
+.tpanel{display:none}.tpanel.on{display:block}
+.atabs{display:flex;gap:3px;flex-wrap:wrap}
+.atab{font-size:7px;background:var(--gp2);color:var(--cream2);border:3px solid var(--soil3);border-bottom:none;padding:11px 16px;cursor:pointer;position:relative;top:3px;transition:all .1s;letter-spacing:.3px}
+.atab:hover{background:var(--gp);color:var(--hay)}
+.atab.on{background:var(--cream);color:var(--soil3);border-bottom:3px solid var(--cream);z-index:2}
+.apanel{background:var(--cream);border:3px solid var(--soil3);box-shadow:5px 5px 0 var(--soil3);padding:0 18px 20px;display:none}
+.apanel.on{display:block}
+
+/* FILTER */
+.frhead{background:var(--gp2);border:3px solid var(--soil3);border-bottom:none;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;font-size:8px;color:var(--hay);flex-wrap:wrap;gap:8px;letter-spacing:.5px}
+.twrap-nb{overflow:hidden;border:3px solid var(--soil3);border-top:none;box-shadow:4px 4px 0 var(--soil3);overflow-x:auto}
+.ftype-btn{font-family:'Press Start 2P',monospace;font-size:6px;background:rgba(255,255,255,.1);color:var(--cream2);border:2px solid rgba(255,255,255,.2);padding:7px 13px;cursor:pointer;transition:all .1s;letter-spacing:.3px}
+.ftype-btn:hover{background:rgba(255,255,255,.2);color:var(--hay);border-color:rgba(255,255,255,.4)}
+.ftype-btn.ap{background:var(--bp);border-color:var(--hay);color:var(--hay);box-shadow:0 3px 0 var(--soil3)}
+.ftype-btn.ad{background:var(--teal2);border-color:var(--hay);color:var(--hay);box-shadow:0 3px 0 var(--soil3)}
+
+/* SEC HEADER */
+.shdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;flex-wrap:wrap;gap:8px}
+.stitle{font-size:8px;color:var(--hay);text-shadow:2px 2px 0 var(--soil3);display:flex;align-items:center;gap:9px;letter-spacing:.5px}
+.stitle-dk{font-size:8px;color:var(--soil3);display:flex;align-items:center;gap:9px;letter-spacing:.5px}
+
+/* PAGINATION */
+.pager{background:var(--cream2);border-top:3px solid var(--soil3);padding:10px 14px;display:flex;justify-content:flex-end;gap:5px;align-items:center}
+.pgbtn{font-family:'Press Start 2P',monospace;font-size:7px;background:var(--cream);border:2px solid var(--soil3);box-shadow:0 3px 0 var(--soil3);padding:7px 11px;cursor:pointer;color:var(--soil3);transition:all .08s}
+.pgbtn:hover{transform:translateY(2px);box-shadow:0 1px 0 var(--soil3);background:var(--cream2)}
+.pgbtn.on{background:var(--gp);color:var(--hay)}
+
+/* MODALS */
+.mbg{display:none;position:fixed;inset:0;background:rgba(10,5,2,.88);z-index:200;place-items:center;backdrop-filter:blur(1px)}
+.mbg.open{display:grid}
+.mbox{background:var(--cream);border:4px solid var(--soil3);box-shadow:10px 10px 0 var(--soil3);width:min(92vw,520px);max-height:90vh;overflow-y:auto;animation:popIn .15s ease}
+.mhead{background:var(--gp);padding:14px 18px;font-size:8px;color:var(--hay);border-bottom:4px solid var(--soil3);display:flex;justify-content:space-between;align-items:center;letter-spacing:.5px}
+.mbody{padding:20px 18px;display:flex;flex-direction:column;gap:12px}
+.mfoot{padding:12px 18px;border-top:3px solid var(--cream2);display:flex;justify-content:flex-end;gap:9px;background:var(--cream2)}
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:480px){.fgrid{grid-template-columns:1fr}}
+.minfo{padding:10px 13px;font-family:'VT323',monospace;font-size:17px;border:2px solid var(--soil3);display:flex;align-items:center;gap:8px}
+.minfo.brw{background:linear-gradient(135deg,var(--hay),var(--hay2));color:var(--soil3)}
+.minfo.dig{background:linear-gradient(135deg,var(--teal),var(--teal2));color:white}
+.pay-success{display:none;text-align:center;padding:24px}
+.pay-success-icon{font-size:48px;display:block;margin-bottom:12px}
+.pay-success-title{font-size:9px;color:var(--grass2);margin-bottom:8px}
+.pay-success-sub{font-family:'VT323',monospace;font-size:18px;color:var(--soil2)}
+.pay-ref{font-family:'VT323',monospace;font-size:16px;background:var(--cream2);border:2px solid var(--soil3);padding:8px 14px;margin:12px auto;display:inline-block;color:var(--soil3)}
+
+/* PROCESSING */
+#pay-processing{display:none;position:fixed;inset:0;background:rgba(20,10,5,.9);z-index:300;place-items:center}
+#pay-processing.show{display:grid}
+.proc-box{background:var(--cream);border:4px solid var(--soil3);box-shadow:8px 8px 0 var(--soil3);padding:36px 40px;text-align:center}
+.proc-spin{font-size:36px;animation:spin 1s steps(4) infinite;display:block;margin-bottom:14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.proc-txt{font-size:8px;color:var(--soil3);margin-bottom:6px}
+.proc-sub{font-family:'VT323',monospace;font-size:16px;color:var(--wood)}
+
+/* TOASTS */
+#toasts{position:fixed;bottom:100px;right:18px;z-index:400;display:flex;flex-direction:column;gap:8px;pointer-events:none}
+.toast{font-family:'VT323',monospace;font-size:19px;background:var(--cream);border:3px solid var(--soil3);box-shadow:5px 5px 0 var(--soil3);padding:11px 16px;display:flex;align-items:center;gap:10px;min-width:230px;max-width:300px;animation:slin .18s ease;pointer-events:auto;line-height:1.3}
+.toast.ok{border-left:6px solid var(--grass);background:linear-gradient(135deg,var(--cream),#edf7e0)}
+.toast.er{border-left:6px solid var(--red);background:linear-gradient(135deg,var(--cream),#fce8e8)}
+.toast.in{border-left:6px solid var(--blue);background:linear-gradient(135deg,var(--cream),#e8f2fc)}
+@keyframes slin{from{transform:translateX(80px);opacity:0}to{transform:translateX(0);opacity:1}}
+
+/* PILLS / STAT CHIPS */
+.pills{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pill{background:var(--soil2);color:var(--hay);border:2px solid var(--soil3);box-shadow:2px 2px 0 var(--soil3);padding:5px 12px;font-family:'Press Start 2P',monospace;font-size:6px;display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
+.pill-n{font-size:14px;font-family:'VT323',monospace;line-height:1}
+.pill.green{background:var(--grass);color:white}
+.pill.yellow{background:var(--hay3);color:white}
+.pill.red{background:var(--red);color:white}
+.pill.teal{background:var(--teal);color:white}
+.pill.blue{background:var(--blue);color:white}
+
+/* admin stat bar */
+.admin-stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:18px}
+.asc{background:var(--cream);border:3px solid var(--soil3);box-shadow:3px 3px 0 var(--soil3);padding:12px 14px;display:flex;align-items:center;gap:10px}
+.asc-icon{font-size:24px;flex-shrink:0}
+.asc-lbl{font-size:5px;color:var(--wood2);letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.asc-val{font-family:'Press Start 2P',monospace;font-size:18px;color:var(--soil3)}
+.asc-sub{font-family:'VT323',monospace;font-size:13px;margin-top:2px}
+.asc.danger .asc-val{color:var(--red)}
+.asc.warn .asc-val{color:var(--orange)}
+.asc[onclick]{transition:transform .1s,box-shadow .1s}.asc[onclick]:hover{transform:translate(-2px,-3px);box-shadow:5px 6px 0 var(--soil3)}
+
+/* MINI CHOOSER */
+.mini-chooser{display:flex;gap:12px;margin-bottom:18px;flex-wrap:wrap}
+.mini-ccard{display:flex;align-items:center;gap:14px;border:3px solid var(--soil3);box-shadow:0 5px 0 var(--soil3);padding:13px 20px;cursor:pointer;transition:transform .1s,box-shadow .1s;flex:1;min-width:160px}
+.mini-ccard.phy{background:linear-gradient(135deg,#c47a3a,#7a4020)}
+.mini-ccard.dig{background:linear-gradient(135deg,#3a9a7a,#1a5a48)}
+.mini-ccard:hover{transform:translate(-2px,-4px);box-shadow:0 9px 0 var(--soil3)}
+.mini-ccard:active{transform:translate(2px,2px);box-shadow:0 1px 0 var(--soil3)}
+.mini-ccard.sel{border-color:var(--hay2);box-shadow:0 5px 0 var(--hay3)}
+
+/* overdue row highlight */
+tr.row-overdue{background:rgba(192,57,43,.08)!important}
+tr.row-overdue:hover{background:rgba(192,57,43,.18)!important}
+
+/* EMPTY */
+.empty{text-align:center;padding:28px;font-family:'VT323',monospace;font-size:20px;color:var(--wood)}
+.empty span{font-size:36px;display:block;margin-bottom:8px}
+
+/* SESSION TIMEOUT BAR */
+#session-bar{position:fixed;top:0;left:0;right:0;height:5px;z-index:500;background:var(--grass2);transition:none}
+#session-bar.warn{background:var(--orange)}
+#session-bar.danger{background:var(--red)}
+#session-warn{position:fixed;top:8px;left:50%;transform:translateX(-50%);z-index:501;background:var(--red);color:white;border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:8px 18px;font-family:'VT323',monospace;font-size:18px;display:none;white-space:nowrap}
+#session-warn.show{display:block}
+
+/* CONFIRM DIALOG */
+#modal-confirm .mbox{width:min(92vw,400px)}
+.confirm-msg{font-family:'VT323',monospace;font-size:20px;color:var(--soil3);text-align:center;padding:8px 0;line-height:1.4}
+.confirm-icon{font-size:36px;text-align:center;display:block;margin-bottom:8px}
+
+/* REGISTER */
+#modal-register .mbox{width:min(92vw,460px)}
+
+/* EDIT MEMBER / BILLING / ADMIN */
+#modal-edit-member .mbox,#modal-edit-billing .mbox,#modal-edit-admin .mbox{width:min(92vw,500px)}
+
+/* XENDIT PAYMENT */
+.xpay-opt{background:var(--cream);border:2px solid var(--soil3);box-shadow:2px 2px 0 var(--soil3);padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:10px;font-family:'VT323',monospace;font-size:16px;color:var(--soil3);transition:all .1s}
+.xpay-opt:hover{background:var(--hay);transform:translate(-1px,-2px);box-shadow:3px 4px 0 var(--soil3)}
+.xpay-opt.sel{background:var(--teal);color:white;border-color:var(--teal2)}
+/* LOW STOCK BADGE */
+.low-stock-badge{display:inline-flex;align-items:center;gap:4px;font-size:6px;padding:3px 8px;border:2px solid var(--orange);background:rgba(230,126,34,.15);color:var(--orange);font-family:'Press Start 2P',monospace;margin-left:6px}
+
+/* EXPORT BTN active */
+.pbtn.exp{background:var(--blue);color:white}.pbtn.exp:hover{background:var(--blue2)}
+
+/* pagination live */
+.pgbtn.on{background:var(--gp);color:var(--hay);pointer-events:none}
+
+/* bookworm dashboard */
+.bw-dash{background:var(--cream);border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:16px;margin-bottom:18px}
+.bw-dash-title{font-size:7px;color:var(--soil3);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.bw-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.bw-card{background:var(--cream);border:3px solid var(--soil3);box-shadow:3px 3px 0 var(--soil3);padding:14px;text-align:center;transition:transform .1s}.bw-card:hover{transform:translate(-2px,-2px)}
+.bw-card-num{font-family:'Press Start 2P',monospace;font-size:20px;color:var(--soil3);display:block;margin-bottom:4px}
+.bw-card-lbl{font-family:'VT323',monospace;font-size:15px;color:var(--wood)}
+.bw-card.red .bw-card-num{color:var(--red)}
+.bw-card.teal .bw-card-num{color:var(--teal)}
+</style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+</head>
+<body>
+
+<div id="session-bar"></div><div id="session-warn">⏰ Session expiring soon! Click anywhere to stay.</div><div id="skybg"></div>
+<div class="cloud" style="animation-duration:36s;animation-delay:0s;top:52px"><svg width="92" height="52" viewBox="0 0 92 52"><rect x="20" y="20" width="52" height="20" fill="white" stroke="#ccc" stroke-width="2"/><rect x="8" y="10" width="30" height="20" fill="white" stroke="#ccc" stroke-width="2"/><rect x="50" y="8" width="28" height="22" fill="white" stroke="#ccc" stroke-width="2"/><rect x="0" y="22" width="18" height="18" fill="white" stroke="#ccc" stroke-width="2"/><rect x="72" y="22" width="20" height="18" fill="white" stroke="#ccc" stroke-width="2"/></svg></div>
+<div class="cloud" style="animation-duration:52s;animation-delay:-22s;top:80px"><svg width="68" height="40" viewBox="0 0 68 40"><rect x="14" y="16" width="40" height="16" fill="white" stroke="#ccc" stroke-width="2"/><rect x="6" y="8" width="24" height="16" fill="white" stroke="#ccc" stroke-width="2"/><rect x="36" y="6" width="20" height="18" fill="white" stroke="#ccc" stroke-width="2"/><rect x="0" y="18" width="14" height="14" fill="white" stroke="#ccc" stroke-width="2"/><rect x="54" y="18" width="14" height="14" fill="white" stroke="#ccc" stroke-width="2"/></svg></div>
+<div class="cloud" style="animation-duration:44s;animation-delay:-11s;top:38px"><svg width="112" height="62" viewBox="0 0 112 62"><rect x="24" y="24" width="64" height="24" fill="white" stroke="#ccc" stroke-width="2"/><rect x="12" y="12" width="38" height="24" fill="white" stroke="#ccc" stroke-width="2"/><rect x="62" y="10" width="34" height="28" fill="white" stroke="#ccc" stroke-width="2"/><rect x="0" y="26" width="24" height="22" fill="white" stroke="#ccc" stroke-width="2"/><rect x="88" y="26" width="24" height="22" fill="white" stroke="#ccc" stroke-width="2"/></svg></div>
+<div id="gstrip"><div class="g-grass"></div><div class="g-soil"></div></div>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-head"><div class="login-logo">aizechive</div><div class="login-sub">✦ Smart Digital Library ✦</div></div>
+    <div class="login-body">
+      <div class="login-who">Choose your role</div>
+      <div class="login-grid" id="role-grid">
+        <div class="login-role u" onclick="showBookwormForm()"><span class="login-role-icon">🌸</span><div class="login-role-label">Bookworm</div><div class="login-role-sub">Login to borrow</div></div>
+        <div class="login-role a" onclick="showAdminForm()"><span class="login-role-icon">🗝️</span><div class="login-role-label">Admin</div><div class="login-role-sub">Manage library</div></div>
+      </div>
+      <!-- Bookworm Login -->
+      <div id="bw-login-form" style="display:none;border-top:2px solid var(--cream2);padding-top:14px;margin-top:4px">
+        <div style="font-size:7px;color:var(--teal);text-align:center;margin-bottom:12px;letter-spacing:.5px">🌸 BOOKWORM LOGIN</div>
+        <div class="frow"><label class="flbl">Email Address</label><input class="finp" id="bw-lg-email" type="email" placeholder="your@email.com" onkeydown="if(event.key==='Enter')doBookwormLogin()"/></div>
+        <div class="frow"><label class="flbl">Password</label><input class="finp" id="bw-lg-pass" type="password" placeholder="Password..." onkeydown="if(event.key==='Enter')doBookwormLogin()"/></div>
+        <button class="pbtn g" style="width:100%;font-size:8px;padding:12px" onclick="doBookwormLogin()">🌸 LOGIN</button>
+        <div id="bw-lg-err" class="login-err">💔 Wrong email or password!</div>
+        <div style="text-align:center;margin-top:10px;display:flex;justify-content:space-between;align-items:center">
+          <button onclick="showRoleGrid()" style="font-family:'VT323',monospace;font-size:15px;background:none;border:none;color:var(--wood);cursor:pointer">← Back</button>
+          <button onclick="switchToRegister()" style="font-family:'VT323',monospace;font-size:15px;background:none;border:none;color:var(--teal);cursor:pointer;text-decoration:underline">No account? Register →</button>
+        </div>
+      </div>
+      <!-- Bookworm Register -->
+      <div id="bw-register-form" style="display:none;border-top:2px solid var(--cream2);padding-top:14px;margin-top:4px">
+        <div style="font-size:7px;color:var(--grass2);text-align:center;margin-bottom:12px;letter-spacing:.5px">🌱 CREATE BOOKWORM ACCOUNT</div>
+        <div class="fgrid">
+          <div class="frow"><label class="flbl">Full Name</label><input class="finp" id="lr-name" placeholder="Full name..."/></div>
+          <div class="frow"><label class="flbl">Contact</label><input class="finp" id="lr-contact" placeholder="09XX-XXX-XXXX"/></div>
+        </div>
+        <div class="frow"><label class="flbl">Email Address</label><input class="finp" id="lr-email" type="email" placeholder="email@..."/></div>
+        <div class="fgrid">
+          <div class="frow"><label class="flbl">Password</label><input class="finp" id="lr-pass" type="password" placeholder="Password..."/></div>
+          <div class="frow"><label class="flbl">Confirm Password</label><input class="finp" id="lr-pass2" type="password" placeholder="Confirm..." onkeydown="if(event.key==='Enter')doRegister()"/></div>
+        </div>
+        <button class="pbtn g" style="width:100%;font-size:8px;padding:12px" onclick="doRegister()">✔ CREATE ACCOUNT</button>
+        <div id="lr-err" class="login-err"></div>
+        <div style="text-align:center;margin-top:10px">
+          <button onclick="switchToLogin()" style="font-family:'VT323',monospace;font-size:15px;background:none;border:none;color:var(--teal);cursor:pointer;text-decoration:underline">← Already have an account?</button>
+        </div>
+      </div>
+      <!-- Admin Login -->
+      <div id="admin-login-form" style="display:none;border-top:2px solid var(--cream2);padding-top:14px;margin-top:4px">
+        <div style="font-size:7px;color:var(--hay3);text-align:center;margin-bottom:12px;letter-spacing:.5px">🗝️ ADMIN LOGIN</div>
+        <div class="frow"><label class="flbl">Username</label><input class="finp" id="lg-user" placeholder="Enter username..."/></div>
+        <div class="frow"><label class="flbl">Password</label><input class="finp" id="lg-pass" type="password" placeholder="Enter password..." onkeydown="if(event.key==='Enter')doAdminLogin()"/></div>
+        <button class="pbtn gold" style="width:100%;margin-top:4px;font-size:8px;padding:12px" onclick="doAdminLogin()">🗝️ LOGIN AS ADMIN</button>
+        <div id="lg-err" class="login-err">💔 Wrong credentials!</div>
+        <div class="login-hint">demo: admin / admin123</div>
+        <div style="text-align:center;margin-top:8px">
+          <button onclick="showRoleGrid()" style="font-family:'VT323',monospace;font-size:15px;background:none;border:none;color:var(--wood);cursor:pointer">← Back</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAY PROCESSING -->
+<div id="pay-processing"><div class="proc-box"><span class="proc-spin">🌟</span><div class="proc-txt">Processing Payment...</div><div class="proc-sub">Please wait...</div></div></div>
+
+<div id="toasts"></div>
+<button id="backbtn" onclick="goBack()">🌸 BACK</button>
+
+<!-- HEADER -->
+<header id="main-header" style="display:none">
+  <div class="hdr-logo">
+    <svg width="40" height="28" viewBox="0 0 72 46"><rect x="16" y="18" width="40" height="16" fill="white" stroke="#aaa" stroke-width="2"/><rect x="8" y="8" width="24" height="16" fill="white" stroke="#aaa" stroke-width="2"/><rect x="40" y="6" width="22" height="18" fill="white" stroke="#aaa" stroke-width="2"/><rect x="0" y="20" width="16" height="14" fill="white" stroke="#aaa" stroke-width="2"/><rect x="56" y="20" width="16" height="14" fill="white" stroke="#aaa" stroke-width="2"/></svg>
+    <div><div class="hdr-logo-title">aizechive</div><div class="hdr-logo-sub">✦ smart library ✦</div></div>
+  </div>
+  <div class="hdr-right" style="margin-left:auto">
+    <nav style="display:flex;align-items:stretch;border-right:2px solid rgba(255,255,255,.1);margin-right:10px">
+      <a class="nbtn on" onclick="goPage('home',this)">Home</a>
+      <a class="nbtn" onclick="goPage('library',this)">Library</a>
+      <a class="nbtn admin-only" onclick="goPage('admin',this)">Admin</a>
+    </nav>
+    <div class="gsearch-wrap" style="position:relative">
+      <input class="gsearch-inp" id="gsearch" placeholder="🔍 search..." oninput="globalSearch(this.value)" onblur="setTimeout(()=>document.getElementById('gsearch-results').classList.remove('show'),200)"/>
+      <div id="gsearch-results"></div>
+    </div>
+    <!-- User account chip -->
+    <div id="user-chip" style="display:none;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);padding:4px 10px;cursor:pointer" onclick="toggleAccountPanel()">
+      <div style="width:22px;height:22px;border-radius:50%;background:var(--grass);border:2px solid var(--soil3);display:flex;align-items:center;justify-content:center;font-size:11px" id="user-avatar">🌸</div>
+      <div>
+        <div style="font-size:6px;color:var(--hay);letter-spacing:.5px" id="user-chip-name">Bookworm</div>
+        <div style="font-family:VT323,monospace;font-size:11px;color:rgba(255,255,255,.6)" id="user-chip-email">—</div>
+      </div>
+      <div style="font-size:10px;color:rgba(255,255,255,.5)">▾</div>
+    </div>
+    <div id="role-badge" class="role-badge user-badge" style="display:none">🍄 Admin</div>
+    <button class="pbtn r" style="font-size:6px;padding:7px 11px" onclick="logout()">✕ logout</button>
+  </div>
+</header>
+<!-- Account Dropdown Panel -->
+<div id="account-panel" style="display:none;position:fixed;top:68px;right:18px;z-index:200;background:var(--cream);border:3px solid var(--soil3);box-shadow:6px 6px 0 var(--soil3);width:260px;animation:popIn .12s ease">
+  <div style="background:var(--gp);padding:14px 16px;border-bottom:3px solid var(--soil3)">
+    <div style="font-size:7px;color:var(--hay);margin-bottom:2px" id="ap-name">—</div>
+    <div style="font-family:VT323,monospace;font-size:15px;color:var(--cream2)" id="ap-email">—</div>
+    <div style="font-family:VT323,monospace;font-size:13px;color:rgba(255,255,255,.6)" id="ap-contact">—</div>
+  </div>
+  <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px">
+    <div style="font-family:VT323,monospace;font-size:15px;color:var(--soil3)">
+      <div style="display:flex;justify-content:space-between"><span>Active Borrows:</span><strong id="ap-active">0</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>Overdue:</span><strong id="ap-overdue" style="color:var(--red)">0</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>Returned:</span><strong id="ap-returned">0</strong></div>
+      <div style="display:flex;justify-content:space-between"><span>eBooks Bought:</span><strong id="ap-paid">0</strong></div>
+    </div>
+    <div style="border-top:2px solid var(--cream2);padding-top:8px;display:flex;gap:6px">
+      <button class="pbtn g" style="font-size:6px;flex:1" onclick="goPage('library',document.querySelectorAll('.nbtn')[1]);toggleAccountPanel()">Browse Books</button>
+      <button class="pbtn r" style="font-size:6px;flex:1" onclick="toggleAccountPanel();logout()">Logout</button>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app" style="display:none">
+
+<!-- HOME -->
+<div id="page-home" class="page on">
+  <div class="home-title">aizechive</div>
+  <div class="sbar">
+    <span>🌱</span><div class="chip">Spring — Year 1</div>
+    <span id="clk">00:00:00</span>
+    <span style="margin-left:auto" id="welcome-msg">✨ Welcome!</span>
+  </div>
+  <div id="overdue-alert" style="display:none" class="alert-banner">
+    <span class="alert-banner-icon">⚠️</span>
+    <span id="overdue-alert-msg">You have overdue books!</span>
+  </div>
+  <div id="bw-dashboard" style="display:none" class="bw-dash">
+    <div class="bw-dash-title"><span>🌸</span> My Borrowing Dashboard</div>
+    <div class="bw-cards">
+      <div class="bw-card teal"><span class="bw-card-num" id="bw-active">0</span><div class="bw-card-lbl">Active Borrows</div></div>
+      <div class="bw-card red"><span class="bw-card-num" id="bw-overdue">0</span><div class="bw-card-lbl">Overdue</div></div>
+      <div class="bw-card"><span class="bw-card-num" id="bw-returned">0</span><div class="bw-card-lbl">Returned</div></div>
+      <div class="bw-card"><span class="bw-card-num" id="bw-paid">0</span><div class="bw-card-lbl">eBooks Bought</div></div>
+    </div>
+    <!-- Active borrows -->
+    <div id="bw-borrow-list" style="display:none;margin-top:12px;border-top:2px solid var(--cream2);padding-top:10px">
+      <div style="font-size:6px;color:var(--soil2);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase">🍀 My Active Borrows</div>
+      <div id="bw-borrows-inner"></div>
+    </div>
+    <!-- eBook Library -->
+    <div id="bw-ebook-list" style="display:none;margin-top:12px;border-top:2px solid var(--cream2);padding-top:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px">
+        <div style="font-size:6px;color:var(--soil2);letter-spacing:1px;text-transform:uppercase">🌙 My eBook Library</div>
+        <div style="font-family:'VT323',monospace;font-size:14px;background:var(--grass);color:white;padding:3px 10px;border:2px solid var(--soil3)">✓ Lifetime Access</div>
+      </div>
+      <div style="font-family:'VT323',monospace;font-size:15px;color:var(--teal2);background:rgba(46,139,122,.08);border:2px solid var(--teal);padding:8px 12px;margin-bottom:12px;line-height:1.5">
+        📚 These are <strong>your books</strong>. You can read or download them anytime — you've already paid for them!
+      </div>
+      <!-- Library search & filter -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+        <input class="pinput" id="lib-bw-search" placeholder="🔍 Search your library..." oninput="filterBwLibrary()"
+          style="flex:1;min-width:140px;font-family:'VT323',monospace;font-size:15px;padding:7px 10px"/>
+        <select class="fsel" id="lib-bw-sort" onchange="filterBwLibrary()" style="font-size:13px;padding:6px 8px;width:auto">
+          <option value="date-desc">Newest First</option>
+          <option value="date-asc">Oldest First</option>
+          <option value="title-asc">Title A→Z</option>
+          <option value="title-desc">Title Z→A</option>
+        </select>
+      </div>
+      <div id="bw-ebooks-inner"></div>
+      <div id="bw-lib-empty" style="display:none;text-align:center;padding:20px;font-family:'VT323',monospace;font-size:18px;color:var(--wood2)">🔍 No books match your search.</div>
+    </div>
+  </div>
+  <div class="cpanel">
+    <div class="ctitle">✦ What are you looking for today? ✦</div>
+    <div class="cgrid">
+      <div class="ccard phy" id="cphy" onclick="openType('Physical')">
+        <span class="cicon">🍀</span>
+        <div class="clabel">Physical Books</div>
+        <div class="csub">Browse &amp; borrow</div>
+        <div class="ccnt" id="cnt-phy">— titles</div>
+        <span class="cavail" id="avail-phy">— available now</span>
+      </div>
+      <div class="ccard dig" id="cdig" onclick="openType('Digital')">
+        <span class="cicon">🌙</span>
+        <div class="clabel">eBooks</div>
+        <div class="csub">Buy &amp; download</div>
+        <div class="ccnt" id="cnt-dig">— titles</div>
+        <span class="cavail" id="avail-dig">— available now</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent + Quick Stats row -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:0" id="home-stats-row">
+    <div style="background:var(--cream);border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:14px">
+      <div style="font-size:6px;color:var(--soil2);letter-spacing:1px;margin-bottom:12px;text-transform:uppercase">📖 Recently Added</div>
+      <div id="home-recent-books" style="display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+    <div style="background:var(--cream);border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:14px">
+      <div style="font-size:6px;color:var(--soil2);letter-spacing:1px;margin-bottom:12px;text-transform:uppercase">📊 Library At a Glance</div>
+      <div id="home-glance" style="font-family:'VT323',monospace;font-size:16px;color:var(--soil3);display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- LIBRARY -->
+<div id="page-library" class="page">
+  <div class="mini-chooser">
+    <div class="mini-ccard phy" id="mini-cphy" onclick="openType('Physical')">
+      <span style="font-size:22px;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.3))">🍀</span>
+      <div>
+        <div style="font-size:7px;color:var(--hay);letter-spacing:.5px">Physical Books</div>
+        <div style="font-family:'VT323',monospace;font-size:14px;color:rgba(255,255,255,.75)" id="mini-cnt-phy">—</div>
+      </div>
+    </div>
+    <div class="mini-ccard dig" id="mini-cdig" onclick="openType('Digital')">
+      <span style="font-size:22px;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.3))">🌙</span>
+      <div>
+        <div style="font-size:7px;color:var(--hay);letter-spacing:.5px">eBooks</div>
+        <div style="font-family:'VT323',monospace;font-size:14px;color:rgba(255,255,255,.75)" id="mini-cnt-dig">—</div>
+      </div>
+    </div>
+  </div>
+  <div class="liblayout">
+    <div>
+      <div id="filt-wrap" style="display:none;margin-bottom:18px">
+        <div class="frhead">
+          <span id="filt-title">Results</span>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <button class="ftype-btn" id="ftbtn-phy" onclick="showFilt('Physical')">Physical Books</button>
+            <button class="ftype-btn" id="ftbtn-dig" onclick="showFilt('Digital')">eBooks</button>
+            <button class="pbtn h" style="font-size:6px;padding:5px 9px" onclick="clearFilt()">✕ CLEAR</button>
+          </div>
+        </div>
+        <div class="twrap-nb"><table><thead><tr><th>#</th><th>Title / Author</th><th>Category</th><th>Barcode</th><th>Status</th><th>Action</th></tr></thead><tbody id="filt-body"></tbody></table></div>
+      </div>
+      <div class="shdr">
+        <div class="stitle"><span>🌼</span> Book Catalog</div>
+        <button class="pbtn g admin-only" onclick="openAddBook()">＋ ADD BOOK</button>
+      </div>
+      <div class="tabrow">
+        <button class="tbtn on" onclick="swTab('tab-all',this);libTypeFilter='All';renderRecent()">All Books</button>
+        <button class="tbtn" onclick="swTab('tab-phy',this);libTypeFilter='Physical';renderRecent()">Physical</button>
+        <button class="tbtn" onclick="swTab('tab-dig',this);libTypeFilter='Digital';renderRecent()">eBooks</button>
+        <button class="tbtn" onclick="swTab('tab-av',this);libTypeFilter='All';renderRecent()">Available</button>
+        <button class="tbtn" onclick="swTab('tab-bw',this);libTypeFilter='All';renderRecent()">Borrowed</button>
+      </div>
+      <div class="twrap" style="box-shadow:none">
+        <div class="ttoolbar"><input class="pinput" placeholder="🔍 Search title, author, category..." oninput="liveSearch(this.value)" id="lib-search-inp"/><button class="pbtn exp admin-only" onclick="exportCSV()">📥 EXPORT</button></div>
+        <div id="tab-all" class="tpanel on"><div class="tscroll"><table id="rtbl"><thead><tr><th>#</th><th>Title / Author</th><th>Category</th><th>Type</th><th>Copies / Status</th><th>Action</th></tr></thead><tbody id="rbody"></tbody></table></div></div>
+        <div id="tab-phy" class="tpanel"><div class="tscroll"><table><thead><tr><th>#</th><th>Title / Author</th><th>Category</th><th>Copies</th><th>Status</th><th>Action</th></tr></thead><tbody id="phybody"></tbody></table></div></div>
+        <div id="tab-dig" class="tpanel"><div class="tscroll"><table><thead><tr><th>#</th><th>Title / Author</th><th>Category</th><th>Price</th><th>Status</th><th>Action</th></tr></thead><tbody id="digbody"></tbody></table></div></div>
+        <div id="tab-av" class="tpanel"><div class="tscroll"><table><thead><tr><th>#</th><th>Title / Author</th><th>Category</th><th>Type</th><th>Copies / Status</th><th>Action</th></tr></thead><tbody id="avbody"></tbody></table></div></div>
+        <div id="tab-bw" class="tpanel"><div class="tscroll"><table><thead><tr><th>#</th><th>Title / Author</th><th>Category</th><th>Type</th><th>Status</th><th>Action</th></tr></thead><tbody id="bwbody"></tbody></table></div></div>
+        <div class="pager" id="lib-pager"></div>
+      </div>
+    </div>
+    <div class="sidebar">
+
+      <div class="smini">
+        <span class="smini-icon">📚</span>
+        <div style="width:100%">
+          <div class="smini-lbl">Total Books</div>
+          <div class="smini-val" id="totbk">—</div>
+          <div style="display:flex;gap:8px;margin-top:4px;flex-wrap:wrap">
+            <div style="font-family:'VT323',monospace;font-size:14px;color:var(--hay3)">🍀 Physical: <span id="stat-phy-total">—</span></div>
+            <div style="font-family:'VT323',monospace;font-size:14px;color:var(--teal)">🌙 eBooks: <span id="stat-dig-total">—</span></div>
+          </div>
+          <div style="margin-top:6px;border-top:1px solid var(--cream3);padding-top:6px">
+            <div style="font-family:'VT323',monospace;font-size:14px;color:var(--grass)">🍀 Available: <span id="stat-phy-avail">—</span> / <span id="stat-phy-total2">—</span></div>
+            <div style="font-family:'VT323',monospace;font-size:14px;color:var(--teal)">🌙 eBooks: <span id="stat-dig-avail">Unlimited</span></div>
+          </div>
+        </div>
+      </div>
+      <div class="qswrap"><div class="qstitle" style="display:flex;justify-content:space-between;align-items:center">🌈 Books by Category<select id="catbar-filter" class="fsel" style="font-size:11px;padding:3px 6px;width:auto;min-width:80px" onchange="renderCatBars()"><option value="All">All</option><option value="Physical">Physical</option><option value="Digital">Digital</option></select></div><div id="catbars"></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN -->
+<div id="page-admin" class="page">
+  <div class="shdr" style="margin-bottom:14px"><div class="stitle"><span>🍄</span> Admin Panel</div></div>
+  <div class="admin-stat-cards" id="admin-stat-cards"></div>
+  <!-- CHARTS ROW -->
+  <style>
+    #admin-charts-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+    @media(max-width:600px){#admin-charts-row{grid-template-columns:1fr}}
+    .chart-box{background:var(--cream);border:3px solid var(--soil3);box-shadow:3px 3px 0 var(--soil3);padding:14px}
+    .chart-wrap{position:relative;width:100%;height:150px}
+  </style>
+  <div id="admin-charts-row">
+    <div class="chart-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:4px">
+        <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--soil3)">🪙 REVENUE</div>
+        <div style="font-family:'VT323',monospace;font-size:14px;color:var(--teal2)" id="chart-rev-subtitle">Total: ₱0</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+        <input type="date" id="chart-date-from" class="finp" style="font-size:13px;padding:4px 7px;width:auto"
+          onchange="renderAdminCharts()"/>
+        <span style="font-family:'VT323',monospace;font-size:16px;color:var(--wood2)">→</span>
+        <input type="date" id="chart-date-to" class="finp" style="font-size:13px;padding:4px 7px;width:auto"
+          onchange="renderAdminCharts()"/>
+        <div style="display:flex;gap:4px;flex-wrap:wrap">
+          <button class="pbtn h" style="font-size:5px;padding:4px 7px" onclick="setChartRange(1)">1M</button>
+          <button class="pbtn h" style="font-size:5px;padding:4px 7px" onclick="setChartRange(3)">3M</button>
+          <button class="pbtn h" style="font-size:5px;padding:4px 7px" onclick="setChartRange(6)">6M</button>
+          <button class="pbtn h" style="font-size:5px;padding:4px 7px" onclick="setChartRange(12)">1Y</button>
+          <button class="pbtn t" style="font-size:5px;padding:4px 7px" onclick="setChartRange(0)">All</button>
+        </div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-revenue"></canvas></div>
+    </div>
+    <div class="chart-box">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:4px">
+        <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--soil3)">🎀 BORROWS</div>
+        <div style="font-family:'VT323',monospace;font-size:14px;color:var(--red)" id="chart-brw-subtitle">Total: 0</div>
+      </div>
+      <div class="chart-wrap"><canvas id="chart-borrows"></canvas></div>
+    </div>
+  </div>
+
+  <div id="overdue-banner" style="display:none" class="alert-banner" style="margin-bottom:14px">
+    <span class="alert-banner-icon">⚠️</span><span id="overdue-banner-msg">Overdue books detected!</span>
+  </div>
+  <div class="atabs">
+    <button class="atab on" onclick="swAdmin('ap-inv',this)">📦 Inventory</button>
+    <button class="atab" onclick="swAdmin('ap-brw',this)">🎀 Borrowed</button>
+    <button class="atab" onclick="swAdmin('ap-bil',this)">🪙 Billing</button>
+    <button class="atab" onclick="swAdmin('ap-mem',this)">🌻 Members</button>
+    <button class="atab" onclick="swAdmin('ap-acc',this)">🗝️ Admins</button>
+  </div>
+
+  <!-- INVENTORY -->
+  <div id="ap-inv" class="apanel on">
+    <div class="shdr" style="padding-top:16px">
+      <div class="stitle-dk"><span>📦</span> Book Inventory</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select class="fsel" id="inv-filter" style="font-size:14px;padding:6px 10px;width:auto" onchange="renderInventory()">
+          <option value="All">All Types</option><option value="Physical">Physical</option><option value="Digital">Digital</option>
+        </select>
+        <button class="pbtn exp" style="font-size:6px;padding:7px 11px" onclick="exportCSV()">📥 EXPORT</button>
+        <button class="pbtn g" onclick="openAddBook()">＋ ADD BOOK</button>
+      </div>
+    </div>
+    <div class="pills" id="inv-pills"></div>
+    <div class="twrap"><div class="ttoolbar"><input class="pinput" placeholder="🔍 Search inventory..." oninput="filtTbl(this,'inv-tbl')" style="width:220px"/></div>
+    <div class="tscroll"><table id="inv-tbl"><thead><tr><th>#</th><th>Title</th><th>Author</th><th>Category</th><th>Type</th><th>Barcode</th><th>Price</th><th>Stocks</th><th>Status</th><th>Current Borrower(s)</th><th>Actions</th></tr></thead><tbody id="inv-body"></tbody></table></div></div>
+  </div>
+
+  <!-- BORROWED -->
+  <div id="ap-brw" class="apanel">
+    <div class="shdr" style="padding-top:16px">
+      <div class="stitle-dk"><span>🎀</span> Borrowed Books</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <select class="fsel" id="brw-filter" style="font-size:14px;padding:6px 10px;width:auto" onchange="renderBorrowed()">
+          <option value="All">All Status</option><option value="Active">Active</option><option value="Overdue">Overdue</option><option value="Returned">Returned</option>
+        </select>
+        <button class="pbtn exp" style="font-size:6px;padding:7px 11px" onclick="exportBorrows()">📥 EXPORT CSV</button>
+      </div>
+    </div>
+    <div class="pills" id="brw-pills"></div>
+    <div class="twrap"><div class="ttoolbar"><input class="pinput" placeholder="🔍 Search records..." oninput="filtTbl(this,'brw-tbl')" style="width:220px"/></div>
+    <div class="tscroll"><table id="brw-tbl"><thead><tr><th>#</th><th>Bookworm</th><th>Email</th><th>Contact</th><th>Book Borrowed</th><th>Date Borrowed</th><th>Due Date</th><th>Status</th><th>Actions</th></tr></thead><tbody id="brw-body"></tbody></table></div></div>
+  </div>
+
+  <!-- BILLING -->
+  <div id="ap-bil" class="apanel">
+    <div class="shdr" style="padding-top:16px">
+      <div class="stitle-dk"><span>🪙</span> Billing Records</div>
+      <select class="fsel" id="bil-filter" style="font-size:14px;padding:6px 10px;width:auto" onchange="renderBilling()">
+        <option value="All">All Transactions</option><option value="Paid">Paid</option><option value="Pending">Pending</option>
+      </select>
+    </div>
+    <div style="background:linear-gradient(135deg,#edf7e0,#d4efc4);border:2px solid var(--grass);padding:10px 14px;font-family:'VT323',monospace;font-size:15px;color:var(--soil2);margin-bottom:10px;line-height:1.6">
+      <strong>✅ Auto-Billing:</strong> eBook payments are <strong>automatically confirmed as PAID</strong> when a bookworm submits their reference number. A unique ref code is generated per transaction. In a real Xendit integration, this is confirmed via webhook from Xendit's servers instantly.
+    </div>
+    <div class="pills" id="bil-pills"></div>
+    <div class="twrap"><div class="ttoolbar"><input class="pinput" placeholder="🔍 Search billing..." oninput="filtTbl(this,'biltbl')"/></div>
+    <div class="tscroll"><table id="biltbl"><thead><tr><th>ID</th><th>Date</th><th>Member</th><th>Book</th><th>Amount</th><th>Mode</th><th>Ref #</th><th>Status</th><th>Actions</th></tr></thead><tbody id="bilbody"></tbody></table></div></div>
+  </div>
+
+  <!-- MEMBERS -->
+  <div id="ap-mem" class="apanel">
+    <div class="shdr" style="padding-top:16px">
+      <div class="stitle-dk"><span>🌻</span> Library Members</div>
+      <button class="pbtn g" onclick="openM('modal-member')">＋ ADD MEMBER</button>
+    </div>
+    <div style="background:var(--cream2);border-left:4px solid var(--hay3);padding:8px 12px;font-family:'VT323',monospace;font-size:15px;color:var(--soil2);margin-bottom:10px">🔒 <strong>Privacy Note:</strong> Passwords are stored hashed and are NOT visible to admins. Only the member can know their own password. If a member forgets their password, they must reset it. (In this demo, passwords are in memory only.)</div>
+    <div class="twrap"><div class="ttoolbar"><input class="pinput" placeholder="🔍 Search members..." oninput="filtTbl(this,'mtbl')"/></div>
+    <div class="tscroll"><table id="mtbl"><thead><tr><th>ID</th><th>Full Name</th><th>Email</th><th>Contact</th><th>Borrows</th><th>Actions</th></tr></thead><tbody id="mbody"></tbody></table></div></div>
+    <div class="mem-history" id="mem-history">
+      <div class="mh-title"><span id="mh-name">Borrow History</span><button class="ibtn" onclick="document.getElementById('mem-history').classList.remove('show')">✕</button></div>
+      <div id="mh-list"></div>
+    </div>
+  </div>
+
+  <!-- ADMINS -->
+  <div id="ap-acc" class="apanel">
+    <div class="shdr" style="padding-top:16px">
+      <div class="stitle-dk"><span>🗝️</span> Admin Accounts</div>
+      <button class="pbtn g" onclick="openM('modal-admin')">＋ ADD ADMIN</button>
+    </div>
+    <div class="twrap"><div class="ttoolbar"><input class="pinput" placeholder="🔍 Search..." oninput="filtTbl(this,'atbl')"/></div>
+    <div class="tscroll"><table id="atbl"><thead><tr><th>ID</th><th>Username</th><th>Status</th><th>Created</th><th>Created By</th><th>Modified</th><th>Actions</th></tr></thead><tbody id="abody"></tbody></table></div></div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- MODALS -->
+
+<!-- ADD/EDIT BOOK -->
+<div class="mbg" id="modal-book">
+<div class="mbox" style="width:min(92vw,560px)">
+  <div class="mhead"><span id="book-modal-title">🌼 Add New Book</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-book')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="b-id"/>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Title</label><input class="finp" id="b-title" placeholder="Book title..."/></div>
+      <div class="frow"><label class="flbl">Author</label><input class="finp" id="b-auth" placeholder="Author name..."/></div>
+    </div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Category</label><select class="fsel" id="b-cat"><option>Fiction</option><option>Non-Fiction</option><option>Science</option><option>History</option><option>Sci-Fi</option><option>Technology</option><option>Arts</option></select></div>
+      <div class="frow"><label class="flbl">Type</label><select class="fsel" id="b-type" onchange="syncBookTypeFields()"><option>Physical</option><option>Digital</option></select></div>
+    </div>
+    <div class="fgrid">
+      <div class="frow" id="b-bc-row"><label class="flbl">Barcode / ISBN</label><input class="finp" id="b-bc" placeholder="ISBN-..."/></div>
+      <div class="frow"><label class="flbl">Copies / Stocks <span style="font-family:VT323,monospace;font-size:14px;color:var(--wood)">(Physical only)</span></label><input class="finp" id="b-stocks" type="number" min="1" placeholder="1" value="1"/></div>
+    </div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Price (₱) — eBook</label><input class="finp" id="b-price" type="number" placeholder="0.00" min="0"/></div>
+      <div class="frow"><label class="flbl">URL (Digital only)</label><input class="finp" id="b-url" placeholder="https://..."/></div>
+    </div>
+    <div class="frow">
+      <label class="flbl">Cover Image</label>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <input class="finp" id="b-cover-url" placeholder="https://... or leave blank for auto color"/>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-family:'VT323',monospace;font-size:14px;color:var(--wood2)">or upload:</span>
+          <input type="file" id="b-cover-file" accept="image/*" onchange="previewCover(this)" style="font-family:'VT323',monospace;font-size:13px;flex:1"/>
+        </div>
+        <div id="b-cover-preview" style="display:none;text-align:center">
+          <img id="b-cover-img" style="max-height:80px;max-width:100%;border:2px solid var(--soil3);object-fit:cover" src="" alt="cover preview"/>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="mfoot"><button class="pbtn r" onclick="closeM('modal-book')">Cancel</button><button class="pbtn g" id="book-save-btn" onclick="saveBook()">✔ Save Book</button></div>
+</div>
+</div>
+
+<!-- BORROW MODAL -->
+<div class="mbg" id="modal-borrow">
+<div class="mbox">
+  <div class="mhead"><span>🍀 Borrow Physical Book</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-borrow')">✕</button></div>
+  <div class="mbody">
+    <div class="minfo brw">🌼 Book: <strong id="bw-bname">—</strong></div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Full Name</label><input class="finp" id="bw-name" placeholder="Full name..."/></div>
+      <div class="frow"><label class="flbl">Email Address</label><input class="finp" id="bw-email" type="email" placeholder="email@..."/></div>
+    </div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Contact Number</label><input class="finp" id="bw-contact" placeholder="09XX-XXX-XXXX"/></div>
+      <div class="frow"><label class="flbl">Due Date for Return</label><input class="finp" id="bw-due" type="date"/></div>
+    </div>
+    <div class="frow"><label class="flbl">Book Borrowed</label><input class="finp" id="bw-book" readonly style="opacity:.7;cursor:not-allowed"/></div>
+    <div style="background:linear-gradient(135deg,#f9f0d8,#f0e4bc);border:2px solid var(--hay3);padding:10px 14px;font-family:'VT323',monospace;font-size:15px;color:var(--soil2);line-height:1.6">
+      <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--soil3);margin-bottom:6px">📋 RETURN POLICY</div>
+      ● Books must be returned on or before the due date.<br>
+      ● Late returns incur a fine of <strong>₱5 per day</strong> overdue.<br>
+      ● Lost or damaged books must be replaced or paid at full price.<br>
+      ● Extensions may be requested at least 2 days before due date.
+    </div>
+  </div>
+  <div class="mfoot"><button class="pbtn r" onclick="closeM('modal-borrow')">Cancel</button><button class="pbtn g" onclick="saveBorrow()">✔ I Agree &amp; Borrow</button></div>
+</div>
+</div>
+
+<!-- EBOOK PAYMENT MODAL — Xendit Demo -->
+<div class="mbg" id="modal-ebook">
+<div class="mbox" style="width:min(92vw,540px)">
+  <div class="mhead" style="background:var(--teal2)"><span>🌙 Buy eBook — Xendit Checkout</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-ebook')">✕</button></div>
+  <div class="mbody" style="padding:0">
+    <!-- Step 1: Book + buyer info -->
+    <div id="eb-step-1">
+      <div style="background:linear-gradient(135deg,var(--teal2),var(--teal));padding:14px 18px;border-bottom:3px solid var(--soil3)">
+        <div style="font-family:'VT323',monospace;font-size:13px;color:rgba(255,255,255,.7)">PURCHASING</div>
+        <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:white;margin:4px 0" id="eb-bname">—</div>
+        <div style="font-family:'VT323',monospace;font-size:22px;color:var(--hay);font-weight:bold">₱<span id="eb-amount-disp">0</span></div>
+        <input type="hidden" id="eb-book"/>
+        <input type="hidden" id="eb-amount"/>
+      </div>
+      <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+        <div class="fgrid">
+          <div class="frow"><label class="flbl">Full Name</label><input class="finp" id="eb-name" placeholder="Full name..."/></div>
+          <div class="frow"><label class="flbl">Email</label><input class="finp" id="eb-email" type="email" placeholder="email@..."/></div>
+        </div>
+        <div class="frow"><label class="flbl">Contact Number</label><input class="finp" id="eb-contact" placeholder="09XX-XXX-XXXX"/></div>
+        <div style="background:rgba(46,139,122,.08);border:2px solid var(--teal);padding:10px 13px;font-family:'VT323',monospace;font-size:15px;color:var(--soil3)">
+          ⚡ You will only receive access to this eBook after payment is <strong>confirmed</strong>.
+        </div>
+      </div>
+      <div class="mfoot"><button class="pbtn r" onclick="closeM('modal-ebook')">Cancel</button><button class="pbtn t" onclick="ebStep2()">Next: Choose Payment →</button></div>
+    </div>
+    <!-- Step 2: Xendit payment method selection -->
+    <div id="eb-step-2" style="display:none">
+      <div style="background:var(--soil3);padding:12px 18px;border-bottom:3px solid var(--soil3);display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--hay)">SELECT PAYMENT METHOD</div>
+        <div style="font-family:'VT323',monospace;font-size:18px;color:var(--gold)">₱<span id="eb-amount-disp2">0</span></div>
+      </div>
+      <div style="padding:16px 18px;display:flex;flex-direction:column;gap:10px">
+        <div style="font-size:6px;color:var(--soil2);letter-spacing:.5px;margin-bottom:2px">POWERED BY XENDIT</div>
+        <!-- E-Wallet options -->
+        <div style="font-family:'VT323',monospace;font-size:14px;color:var(--wood);margin-bottom:4px">E-Wallets</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px" id="xendit-wallets">
+          <div class="xpay-opt" onclick="selectXMethod('gcash','GCash')" data-m="GCash">
+            <div style="font-size:20px">💚</div><div>GCash</div>
+          </div>
+          <div class="xpay-opt" onclick="selectXMethod('maya','Maya')" data-m="Maya">
+            <div style="font-size:20px">💜</div><div>Maya</div>
+          </div>
+          <div class="xpay-opt" onclick="selectXMethod('shopee','ShopeePay')" data-m="ShopeePay">
+            <div style="font-size:20px">🧡</div><div>ShopeePay</div>
+          </div>
+        </div>
+        <!-- Bank transfer -->
+        <div style="font-family:'VT323',monospace;font-size:14px;color:var(--wood);margin-top:4px;margin-bottom:4px">Bank Transfer / OTC</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <div class="xpay-opt" onclick="selectXMethod('bpi','BPI')" data-m="BPI">
+            <div style="font-size:20px">🏦</div><div>BPI</div>
+          </div>
+          <div class="xpay-opt" onclick="selectXMethod('bdo','BDO')" data-m="BDO">
+            <div style="font-size:20px">🏦</div><div>BDO</div>
+          </div>
+        </div>
+        <!-- Cards -->
+        <div style="font-family:'VT323',monospace;font-size:14px;color:var(--wood);margin-top:4px;margin-bottom:4px">Credit / Debit Card</div>
+        <div class="xpay-opt" style="width:100%" onclick="selectXMethod('card','Credit/Debit Card')" data-m="Card">
+          <div style="font-size:20px">💳</div><div>Credit / Debit Card (Visa, Mastercard)</div>
+        </div>
+      </div>
+      <div class="mfoot"><button class="pbtn b" onclick="ebBack1()">← Back</button><button class="pbtn t" id="eb-proceed-btn" onclick="ebStep3()" disabled style="opacity:.4">Pay Now →</button></div>
+    </div>
+    <!-- Step 3: Fake Xendit checkout UI -->
+    <div id="eb-step-3" style="display:none">
+      <div style="background:var(--soil3);padding:12px 18px;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--soil3)">
+        <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--hay)" id="eb-method-label">GCash</div>
+        <div style="font-family:'VT323',monospace;font-size:20px;color:var(--gold)">₱<span id="eb-amount-disp3">0</span></div>
+      </div>
+      <div style="padding:16px 18px;display:flex;flex-direction:column;gap:12px">
+        <div id="eb-gcash-ui" style="display:none;text-align:center">
+          <div style="font-size:40px;margin-bottom:8px">💚</div>
+          <div style="font-family:'VT323',monospace;font-size:18px;color:var(--soil3);margin-bottom:12px">Send to GCash Number:</div>
+          <div style="font-family:'Press Start 2P',monospace;font-size:14px;color:var(--teal);background:var(--cream2);border:2px solid var(--soil3);padding:10px;letter-spacing:3px">0917-XNDT-DEMO</div>
+          <div style="font-family:'VT323',monospace;font-size:15px;color:var(--wood);margin-top:8px">Account Name: AizeChive Library</div>
+        </div>
+        <div id="eb-card-ui" style="display:none">
+          <div class="frow"><label class="flbl">Card Number</label><input class="finp" id="eb-card-num" placeholder="4242 4242 4242 4242" maxlength="19" oninput="fmtCard(this)"/></div>
+          <div class="fgrid">
+            <div class="frow"><label class="flbl">Expiry (MM/YY)</label><input class="finp" id="eb-card-exp" placeholder="12/27" maxlength="5"/></div>
+            <div class="frow"><label class="flbl">CVV</label><input class="finp" id="eb-card-cvv" placeholder="123" maxlength="3" type="password"/></div>
+          </div>
+        </div>
+        <div id="eb-bank-ui" style="display:none;text-align:center">
+          <div style="font-size:40px;margin-bottom:8px">🏦</div>
+          <div style="font-family:'VT323',monospace;font-size:17px;color:var(--soil3);margin-bottom:6px">Transfer to:</div>
+          <div style="background:var(--cream2);border:2px solid var(--soil3);padding:10px;font-family:VT323,monospace;font-size:16px;line-height:1.8;color:var(--soil3)">
+            Bank: <strong id="eb-bank-name">BPI</strong><br>
+            Account: <strong>0012-3456-78</strong><br>
+            Name: <strong>AizeChive Library System</strong>
+          </div>
+        </div>
+        <div class="frow"><label class="flbl">Reference / Transaction Number</label><input class="finp" id="eb-ref" placeholder="Enter ref # after payment..."/></div>
+        <div style="background:rgba(46,139,122,.08);border:2px solid var(--teal);padding:8px 12px;font-family:'VT323',monospace;font-size:14px;color:var(--soil3)">
+          📌 Your eBook access will be activated once payment is verified. Status will show <strong>Pending</strong> until admin confirms.
+        </div>
+      </div>
+      <div class="mfoot"><button class="pbtn b" onclick="ebBack2()">← Back</button><button class="pbtn t" onclick="processPayment()">✔ Submit Payment</button></div>
+    </div>
+    <!-- Step 4: Success -->
+    <div id="eb-success-step" style="display:none;text-align:center;padding:32px 24px">
+      <div style="font-size:52px;margin-bottom:12px">🌟</div>
+      <div style="font-size:9px;color:var(--grass2);margin-bottom:8px">Payment Submitted!</div>
+      <div style="font-family:'VT323',monospace;font-size:18px;color:var(--soil3);margin-bottom:10px">Your payment is being verified.<br>eBook access will be granted once confirmed.</div>
+      <div class="pay-ref" id="eb-success-ref">Ref: —</div>
+      <div style="font-family:'VT323',monospace;font-size:16px;margin-top:8px;padding:8px;background:linear-gradient(135deg,#edf7e0,#d4efc4);border:2px solid var(--grass)">Status: <strong style="color:var(--grass2)">✓ PAID</strong> — access granted automatically</div>
+    </div>
+  </div>
+  <div class="mfoot" id="eb-mfoot" style="display:none"><button class="pbtn g" onclick="closeM('modal-ebook')">Done ✓</button></div>
+</div>
+</div>
+
+<!-- BORROW DETAIL EDIT (admin) -->
+<div class="mbg" id="modal-brw-detail">
+<div class="mbox" style="width:min(92vw,560px)">
+  <div class="mhead"><span>🎀 Borrow Record</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-brw-detail')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="bd-id"/>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Bookworm Name</label><input class="finp" id="bd-name"/></div>
+      <div class="frow"><label class="flbl">Email</label><input class="finp" id="bd-email" type="email"/></div>
+    </div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Contact</label><input class="finp" id="bd-contact"/></div>
+      <div class="frow"><label class="flbl">Book Borrowed</label><input class="finp" id="bd-book"/></div>
+    </div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Date Borrowed</label><input class="finp" id="bd-borrowed" type="date"/></div>
+      <div class="frow"><label class="flbl">Due Date</label><input class="finp" id="bd-due" type="date"/></div>
+    </div>
+    <div class="frow"><label class="flbl">Return Status</label>
+      <select class="fsel" id="bd-stat"><option value="Active">Active — Not yet returned</option><option value="Overdue">Overdue — Past due date</option><option value="Returned">Returned ✓</option></select>
+    </div>
+  </div>
+  <div class="mfoot"><button class="pbtn r" onclick="closeM('modal-brw-detail')">Cancel</button><button class="pbtn g" onclick="saveBorrowRecord()">✔ Save Changes</button></div>
+</div>
+</div>
+
+<!-- ADD MEMBER -->
+<div class="mbg" id="modal-member">
+<div class="mbox">
+  <div class="mhead"><span>🌻 Add New Member</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-member')">✕</button></div>
+  <div class="mbody">
+    <div class="frow"><label class="flbl">Full Name</label><input class="finp" id="m-name" placeholder="Full name..."/></div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Email Address</label><input class="finp" id="m-email" type="email" placeholder="email@..."/></div>
+      <div class="frow"><label class="flbl">Contact Number</label><input class="finp" id="m-contact" placeholder="09XX-XXX-XXXX"/></div>
+    </div>
+  </div>
+  <div class="mfoot"><button class="pbtn r" onclick="closeM('modal-member')">Cancel</button><button class="pbtn g" onclick="saveMember()">✔ Save Member</button></div>
+</div>
+</div>
+
+<!-- ADD BILLING -->
+<div class="mbg" id="modal-billing">
+<div class="mbox">
+  <div class="mhead"><span>🪙 Add Billing Record</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-billing')">✕</button></div>
+  <div class="mbody">
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Billing Date</label><input class="finp" id="bi-date" type="date"/></div>
+      <div class="frow"><label class="flbl">Member Name</label><input class="finp" id="bi-mem" placeholder="Member name..."/></div>
+    </div>
+    <div class="frow"><label class="flbl">Book Title</label><input class="finp" id="bi-book" placeholder="Book title..."/></div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Amount (₱)</label><input class="finp" id="bi-amt" type="number" placeholder="0.00"/></div>
+      <div class="frow"><label class="flbl">Mode of Payment</label><select class="fsel" id="bi-mode"><option>GCash</option><option>Maya</option><option>Bank Transfer</option><option>Credit Card</option></select></div>
+    </div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Reference Number</label><input class="finp" id="bi-ref" placeholder="REF-..."/></div>
+      <div class="frow"><label class="flbl">Status</label><select class="fsel" id="bi-stat"><option>Paid</option><option>Pending</option><option>Overdue</option></select></div>
+    </div>
+  </div>
+  <div class="mfoot"><button class="pbtn r" onclick="closeM('modal-billing')">Cancel</button><button class="pbtn g" onclick="saveBilling()">✔ Save Record</button></div>
+</div>
+</div>
+
+<!-- ADD ADMIN -->
+<div class="mbg" id="modal-admin">
+<div class="mbox">
+  <div class="mhead"><span>🍄 Add Admin Account</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-admin')">✕</button></div>
+  <div class="mbody">
+    <div class="frow"><label class="flbl">Username</label><input class="finp" id="ad-user" placeholder="username..."/></div>
+    <div class="frow"><label class="flbl">Password</label><input class="finp" id="ad-pass" type="password" placeholder="••••••••"/></div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Status</label><select class="fsel" id="ad-stat"><option>Active</option><option>Inactive</option></select></div>
+      <div class="frow"><label class="flbl">Created By</label><input class="finp" id="ad-by" placeholder="admin name..."/></div>
+    </div>
+  </div>
+  <div class="mfoot"><button class="pbtn r" onclick="closeM('modal-admin')">Cancel</button><button class="pbtn g" onclick="saveAdmin()">✔ Create Admin</button></div>
+</div>
+</div>
+
+<!-- CONFIRM DIALOG -->
+<div class="mbg" id="modal-confirm">
+<div class="mbox" style="width:min(92vw,400px)">
+  <div class="mhead"><span id="confirm-title">⚠️ Confirm</span><button class="ibtn" style="background:var(--red);color:white" onclick="confirmCancel()">✕</button></div>
+  <div class="mbody" style="text-align:center">
+    <span class="confirm-icon" id="confirm-icon">⚠️</span>
+    <div class="confirm-msg" id="confirm-msg">Are you sure?</div>
+  </div>
+  <div class="mfoot" style="justify-content:center;gap:14px">
+    <button class="pbtn r" onclick="confirmCancel()">✕ Cancel</button>
+    <button class="pbtn g" id="confirm-ok-btn" onclick="confirmOk()">✔ Confirm</button>
+  </div>
+</div>
+</div>
+
+<!-- REGISTER BOOKWORM -->
+<div class="mbg" id="modal-register">
+<div class="mbox" style="width:min(92vw,460px)">
+  <div class="mhead"><span>🌸 Create Bookworm Account</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-register')">✕</button></div>
+  <div class="mbody">
+    <div class="frow"><label class="flbl">Full Name</label><input class="finp" id="reg-name" placeholder="Your full name..."/></div>
+    <div class="frow"><label class="flbl">Email Address</label><input class="finp" id="reg-email" type="email" placeholder="email@..."/></div>
+    <div class="frow"><label class="flbl">Contact Number</label><input class="finp" id="reg-contact" placeholder="09XX-XXX-XXXX"/></div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Password</label><input class="finp" id="reg-pass" type="password" placeholder="••••••••"/></div>
+      <div class="frow"><label class="flbl">Confirm Password</label><input class="finp" id="reg-pass2" type="password" placeholder="••••••••"/></div>
+    </div>
+    <div id="reg-err" style="display:none;font-family:'VT323',monospace;font-size:16px;color:var(--red);padding:6px;border:2px solid var(--red)"></div>
+  </div>
+  <div class="mfoot"><button class="pbtn r" onclick="closeM('modal-register')">Cancel</button><button class="pbtn g" onclick="saveRegister()">🌸 Register</button></div>
+</div>
+</div>
+
+<!-- EDIT MEMBER -->
+<div class="mbg" id="modal-edit-member">
+<div class="mbox">
+  <div class="mhead"><span>✍️ Edit Member</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-edit-member')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="em-id"/>
+    <div class="frow"><label class="flbl">Full Name</label><input class="finp" id="em-name"/></div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Email</label><input class="finp" id="em-email" type="email"/></div>
+      <div class="frow"><label class="flbl">Contact</label><input class="finp" id="em-contact"/></div>
+    </div>
+  </div>
+  <div class="mfoot"><button class="pbtn r" onclick="closeM('modal-edit-member')">Cancel</button><button class="pbtn g" onclick="saveEditMember()">✔ Save</button></div>
+</div>
+</div>
+
+<!-- EDIT BILLING -->
+<div class="mbg" id="modal-edit-billing">
+<div class="mbox">
+  <div class="mhead"><span>✍️ Edit Billing Record</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-edit-billing')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="ebil-id"/>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Date</label><input class="finp" id="ebil-date" type="date"/></div>
+      <div class="frow"><label class="flbl">Member Name</label><input class="finp" id="ebil-mem"/></div>
+    </div>
+    <div class="frow"><label class="flbl">Book Title</label><input class="finp" id="ebil-book"/></div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Amount (₱)</label><input class="finp" id="ebil-amt" type="number"/></div>
+      <div class="frow"><label class="flbl">Mode</label><select class="fsel" id="ebil-mode"><option>GCash</option><option>Maya</option><option>Bank Transfer</option><option>Credit Card</option><option>Cash</option></select></div>
+    </div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Reference #</label><input class="finp" id="ebil-ref"/></div>
+      <div class="frow"><label class="flbl">Status</label><select class="fsel" id="ebil-stat"><option>Paid</option><option>Pending</option><option>Overdue</option></select></div>
+    </div>
+  </div>
+  <div class="mfoot"><button class="pbtn r" onclick="closeM('modal-edit-billing')">Cancel</button><button class="pbtn g" onclick="saveEditBilling()">✔ Save</button></div>
+</div>
+</div>
+
+<!-- EDIT ADMIN -->
+<div class="mbg" id="modal-edit-admin">
+<div class="mbox">
+  <div class="mhead"><span>✍️ Edit Admin Account</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-edit-admin')">✕</button></div>
+  <div class="mbody">
+    <input type="hidden" id="ead-id"/>
+    <div class="frow"><label class="flbl">Username</label><input class="finp" id="ead-user"/></div>
+    <div class="frow"><label class="flbl">New Password <span style="font-family:VT323;font-size:14px;font-weight:normal">(leave blank to keep)</span></label><input class="finp" id="ead-pass" type="password" placeholder="New password..."/></div>
+    <div class="fgrid">
+      <div class="frow"><label class="flbl">Status</label><select class="fsel" id="ead-stat"><option>Active</option><option>Inactive</option></select></div>
+      <div class="frow"><label class="flbl">Modified By</label><input class="finp" id="ead-by" placeholder="admin name..."/></div>
+    </div>
+  </div>
+  <div class="mfoot"><button class="pbtn r" onclick="closeM('modal-edit-admin')">Cancel</button><button class="pbtn g" onclick="saveEditAdmin()">✔ Save</button></div>
+</div>
+</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   AizeChive — Smart Digital Library
+   Frontend wired to PHP backend via fetch()
+   Backend base: api/
+══════════════════════════════════════════════ */
+
+const API = 'api';
+
+/* ══ STATE ══ */
+let BOOKS = [];
+let MEMBERS = [];
+let BILLING = [];
+let BORROW_RECORDS = [];
+let ADMINS = [];
+let currentRole = null;
+let currentUserId = null;
+let currentUserName = '';
+let currentUserEmail = '';
+let currentUserContact = '';
+let sfMode = 'title';
+let pageHist = [];
+let pendingEbookId = null;
+let libPage = 1;
+const LIB_PER_PAGE = 6;
+let libTypeFilter = 'All';
+
+/* ══ API HELPERS ══ */
+async function api(endpoint, method='GET', body=null){
+  const opts = { method, headers:{'Content-Type':'application/json'}, credentials:'include' };
+  if(body) opts.body = JSON.stringify(body);
+  try {
+    const r = await fetch(API+'/'+endpoint, opts);
+    return await r.json();
+  } catch(e) {
+    console.error('API error:', endpoint, e);
+    return { success: false, error: 'Network error' };
+  }
+}
+
+/* ══ LOAD ALL DATA ══ */
+async function loadAll(){
+  const [bk, mem, bil, bor, adm] = await Promise.all([
+    api('books.php'),
+    api('members.php'),
+    currentRole === 'user' && currentUserId
+      ? api('billing.php?user_id=' + currentUserId)
+      : api('billing.php'),
+    api('borrows.php'),
+    api('admins.php'),
+  ]);
+  BOOKS          = bk.data   || [];
+  MEMBERS        = mem.data  || [];
+  BILLING        = bil.data  || [];
+  BORROW_RECORDS = bor.data  || [];
+  ADMINS         = adm.data  || [];
+  // Normalize field names from PHP to match JS usage
+  BOOKS = BOOKS.map(b=>({
+    id:      b.idBooks || b.id,
+    title:   b.Title  || b.title,
+    author:  b.Author || b.author,
+    cat:     b.Category || b.cat,
+    type:    b.Type   || b.type,
+    bc:      b.Barcode || b.bc,
+    url:     b.URL    || b.url,
+    cover:   b.cover_url || b.cover || '',
+    stat:    b.Status || b.stat,
+    price:   parseFloat(b.price||0),
+    stocks:  parseInt(b.stocks||1),
+    borrowed_count: parseInt(b.borrowed_count||0),
+    available_copies: parseInt(b.available_copies ?? ((b.stocks||1)-(b.borrowed_count||0))),
+  }));
+  MEMBERS = MEMBERS.map(m=>({
+    id:      m.id_username || m.id,
+    name:    m.fullname || m.name,
+    email:   m.email,
+    contact: m.contact,
+    borrow_count: parseInt(m.borrow_count||0),
+  }));
+  BILLING = BILLING.map(b=>({
+    id:       b.idbilling || b.id,
+    date:     b.billing_date || b.date || (b.created_date||'').split('T')[0].split(' ')[0] || '',
+    mem:      b.member_name || b.mem,
+    email:    b.member_email || b.email,
+    book:     b.book_title_full || b.book_title || b.book,
+    bookId:   parseInt(b.book_id || b.bookId) || 0,
+    amt:      parseFloat(b.amount || b.amt || 0),
+    mode:     b.mode_of_payment || b.mode,
+    ref:      b.reference_number || b.ref,
+    stat:     b.status_of_payment || b.stat,
+    userId:   b.user_id,
+    book_url: b.book_url || b.URL || '',
+  }));
+  BORROW_RECORDS = BORROW_RECORDS.map(r=>({
+    id:       r.id,
+    name:     r.borrower_name || r.name,
+    email:    r.email,
+    contact:  r.contact,
+    book:     r.book_title || r.book,
+    bookId:   r.book_id || r.bookId,
+    borrowed: r.date_borrowed || r.borrowed,
+    due:      r.due_date || r.due,
+    returned: r.date_returned || r.returned,
+    stat:     r.status || r.stat,
+    userId:   r.user_id,
+    fine_amount: parseFloat(r.fine_amount||0),
+  }));
+  ADMINS = ADMINS.map(a=>({
+    id:       a.idadmin || a.id,
+    user:     a.username || a.user,
+    stat:     a.is_active?'Active':'Inactive',
+    created:  a.created_date || a.created,
+    by:       a.created_by || a.by,
+    modified: a.date_modified || a.modified,
+  }));
+}
+
+/* ══ OVERDUE CHECK ══ */
+function checkOverdue(){
+  const today = new Date().toISOString().split('T')[0];
+  BORROW_RECORDS.forEach(r=>{
+    if(r.stat==='Active' && r.due < today) r.stat = 'Overdue';
+  });
+}
+
+function normalizeEmail(email){
+  return String(email || '').trim().toLowerCase();
+}
+
+function isCurrentUserRecord(record){
+  if(!record) return false;
+  if(currentUserId && record.userId && String(record.userId) === String(currentUserId)) return true;
+  return !!(normalizeEmail(record.email) && normalizeEmail(record.email) === normalizeEmail(currentUserEmail));
+}
+
+function getCurrentUserBorrows(){
+  return BORROW_RECORDS.filter(isCurrentUserRecord);
+}
+
+function getCurrentUserPaidBilling(){
+  return BILLING.filter(b => b.stat === 'Paid' && isCurrentUserRecord(b));
+}
+
+function getOwnedEbookPurchase(bookId){
+  const paid = getCurrentUserPaidBilling().filter(b=>String(b.bookId) === String(bookId));
+  if(!paid.length) return null;
+  return paid.sort((a,b)=>String(b.date || '').localeCompare(String(a.date || '')))[0];
+}
+
+function userOwnsEbook(bookId){
+  return !!getOwnedEbookPurchase(bookId);
+}
+
+function getEbookActionBtn(b){
+  const owned = getOwnedEbookPurchase(b.id);
+  if(owned){
+    if(b.url){
+      return `<button class="pbtn gold" style="font-size:6px;padding:5px 8px" onclick="openOwnedEbook(${b.id})">📖 READ OWNED</button>`;
+    }
+    return `<span class="bdg av">Owned already</span>`;
+  }
+  return `<button class="pbtn t" style="font-size:6px;padding:5px 8px" onclick="openEbookM(${b.id})">🛒 BUY ₱${b.price}</button>`;
+}
+
+function openOwnedEbook(bookId){
+  const book = BOOKS.find(x=>String(x.id)===String(bookId));
+  const owned = getOwnedEbookPurchase(bookId);
+  if(!book || !owned){
+    toast('This eBook is not in your library yet.','er');
+    return;
+  }
+  if(!book.url){
+    toast('This eBook file is not linked yet.','er');
+    return;
+  }
+  openEbookReader(book.url, book.title, owned.ref || '');
+}
+
+function getActiveBorrowsForBook(bookId, onlyCurrentUser=false){
+  return BORROW_RECORDS.filter(r=>{
+    if(String(r.bookId) !== String(bookId)) return false;
+    if(r.stat === 'Returned') return false;
+    return onlyCurrentUser ? isCurrentUserRecord(r) : true;
+  });
+}
+
+function borrowedCatalogRow(b, onlyCurrentUser=false){
+  const relatedBorrows = getActiveBorrowsForBook(b.id, onlyCurrentUser);
+  if(!relatedBorrows.length) return '';
+
+  const detailLines = relatedBorrows.map(r=>{
+    const who = currentRole === 'admin'
+      ? `${r.name} • ${r.email || 'No email'}`
+      : `Borrowed: ${r.borrowed} • Due: ${r.due}`;
+    const dueTone = r.stat === 'Overdue' ? 'var(--red)' : 'var(--soil2)';
+    return `<div style="margin-top:4px;padding-top:4px;border-top:1px dashed var(--cream3)">
+      <div style="font-family:'VT323',monospace;font-size:13px;color:var(--wood)">${who}</div>
+      ${currentRole === 'admin'
+        ? `<div style="font-family:'VT323',monospace;font-size:13px;color:${dueTone}">Borrowed: ${r.borrowed} • Due: ${r.due} • ${r.stat}</div>`
+        : `<div style="font-family:'VT323',monospace;font-size:13px;color:${dueTone}">${r.stat}</div>`}
+    </div>`;
+  }).join('');
+
+  let action = '';
+  if(currentRole === 'admin'){
+    action = `<span class="bdg ac">${relatedBorrows.length} active</span>`;
+  } else if(relatedBorrows.some(r=>r.stat === 'Overdue')){
+    action = `<span class="bdg od">Overdue</span>`;
+  } else {
+    action = `<span class="bdg ac">Borrowed</span>`;
+  }
+
+  return `<tr><td>${b.id}</td>
+    <td><div class="tdm td-wrap">${b.title}</div><div class="tds">${b.author}</div></td>
+    <td>${b.cat}</td>
+    <td><span class="bdg phy">Physical</span></td>
+    <td>
+      <span class="bdg ${relatedBorrows.some(r=>r.stat === 'Overdue') ? 'od' : 'ac'}">${relatedBorrows.length} active borrow${relatedBorrows.length>1?'s':''}</span>
+      ${detailLines}
+    </td>
+    <td>${action}</td></tr>`;
+}
+
+/* ══ LOGIN / AUTH ══ */
+function showRoleGrid(){
+  document.getElementById('role-grid').style.display='grid';
+  ['bw-login-form','bw-register-form','admin-login-form'].forEach(id=>{
+    document.getElementById(id).style.display='none';
+  });
+}
+function showBookwormForm(){
+  document.getElementById('role-grid').style.display='none';
+  document.getElementById('bw-login-form').style.display='block';
+  document.getElementById('bw-register-form').style.display='none';
+  document.getElementById('bw-lg-email').focus();
+}
+function switchToRegister(){
+  document.getElementById('bw-login-form').style.display='none';
+  document.getElementById('bw-register-form').style.display='block';
+  document.getElementById('lr-name').focus();
+}
+function switchToLogin(){
+  document.getElementById('bw-register-form').style.display='none';
+  document.getElementById('bw-login-form').style.display='block';
+}
+function showAdminForm(){
+  document.getElementById('role-grid').style.display='none';
+  document.getElementById('admin-login-form').style.display='block';
+  document.getElementById('lg-user').focus();
+}
+
+async function doBookwormLogin(){
+  const e = document.getElementById('bw-lg-email').value.trim();
+  const p = document.getElementById('bw-lg-pass').value;
+  const err = document.getElementById('bw-lg-err');
+  const res = await api('auth.php', 'POST', { action:'login_bookworm', email:e, password:p });
+  if(res.success){
+    currentRole = 'user';
+    const ud = res.data || res.user || {};
+    currentUserId = ud.id || null;
+    currentUserName = ud.name || '';
+    currentUserEmail = ud.email || e;
+    currentUserContact = ud.contact || '';
+    await loadAll();
+    launchApp();
+  } else {
+    err.style.display = 'block';
+    setTimeout(()=>err.style.display='none', 2500);
+  }
+}
+
+async function doRegister(){
+  const n  = document.getElementById('lr-name').value.trim();
+  const e  = document.getElementById('lr-email').value.trim();
+  const c  = document.getElementById('lr-contact').value.trim();
+  const p  = document.getElementById('lr-pass').value;
+  const p2 = document.getElementById('lr-pass2').value;
+  const err = document.getElementById('lr-err');
+  err.style.display = 'none';
+  if(!n||!e||!p){ err.textContent='Name, email & password required!'; err.style.display='block'; return; }
+  if(p!==p2){ err.textContent='Passwords do not match!'; err.style.display='block'; return; }
+  const res = await api('auth.php', 'POST', { action:'register', fullname:n, email:e, contact:c, password:p, confirm:p2 });
+  if(res.success){
+    currentRole = 'user';
+    currentUserId = (res.data||res.user||{}).id || null;
+    currentUserName = n;
+    currentUserEmail = e;
+    currentUserContact = c;
+    await loadAll();
+    launchApp();
+    toast('🌱 Account created! Welcome, '+n+'!','ok');
+  } else {
+    err.textContent = res.message || res.error || 'Registration failed!';
+    err.style.display = 'block';
+  }
+}
+
+async function doAdminLogin(){
+  const u = document.getElementById('lg-user').value.trim();
+  const p = document.getElementById('lg-pass').value;
+  const err = document.getElementById('lg-err');
+  const res = await api('auth.php', 'POST', { action:'login_admin', username:u, password:p });
+  if(res.success){
+    currentRole = 'admin';
+    await loadAll();
+    launchApp();
+  } else {
+    err.style.display = 'block';
+    setTimeout(()=>err.style.display='none', 2500);
+  }
+}
+
+function launchApp(){
+  checkOverdue();
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-header').style.display='grid';
+  document.getElementById('app').style.display='block';
+  if(currentRole==='admin'){
+    document.getElementById('role-badge').style.display='inline-block';
+    document.getElementById('user-chip').style.display='none';
+    document.getElementById('role-badge').textContent='🍄 Admin';
+    document.getElementById('welcome-msg').textContent='✨ Welcome back, Admin!';
+    document.querySelectorAll('.admin-only').forEach(el=>el.style.display='inline-block');
+  } else {
+    document.getElementById('role-badge').style.display='none';
+    const chip = document.getElementById('user-chip');
+    chip.style.display='flex';
+    document.getElementById('user-chip-name').textContent = currentUserName||'Bookworm';
+    document.getElementById('user-chip-email').textContent = currentUserEmail||'';
+    document.getElementById('user-avatar').textContent = currentUserName?currentUserName[0].toUpperCase():'🌸';
+    document.getElementById('welcome-msg').textContent='✨ Welcome to AizeChive!';
+    document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
+  }
+  initCounts(); renderAll(); showOverdueAlerts();
+  if(currentRole==='user') renderBwDash();
+}
+
+async function logout(){
+  await api('auth.php', 'POST', { action:'logout' });
+  currentRole = null; currentUserId = null;
+  currentUserName=''; currentUserEmail=''; currentUserContact='';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('main-header').style.display='none';
+  document.getElementById('app').style.display='none';
+  ['admin-login-form','bw-login-form','bw-register-form'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('role-grid').style.display='grid';
+  document.getElementById('lg-user').value='';
+  document.getElementById('lg-pass').value='';
+  document.getElementById('bw-lg-email').value='';
+  document.getElementById('bw-lg-pass').value='';
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('page-home').classList.add('on');
+  document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('on'));
+  document.querySelector('.nbtn').classList.add('on');
+  document.getElementById('backbtn').classList.remove('show');
+  BOOKS=[]; MEMBERS=[]; BILLING=[]; BORROW_RECORDS=[]; ADMINS=[];
+}
+
+/* ══ OVERDUE ALERTS ══ */
+function showOverdueAlerts(){
+  const od = BORROW_RECORDS.filter(r=>r.stat==='Overdue').length;
+  const hb = document.getElementById('overdue-alert');
+  if(hb){ hb.style.display=od>0?'flex':'none';
+    if(od>0) document.getElementById('overdue-alert-msg').textContent=`⚠️ ${od} book${od>1?'s':''} overdue! Please return them ASAP.`; }
+  const ab = document.getElementById('overdue-banner');
+  if(ab){ ab.style.display=od>0?'flex':'none';
+    if(od>0) document.getElementById('overdue-banner-msg').textContent=`⚠️ ${od} overdue borrow record${od>1?'s':''} detected! Check Borrowed tab.`; }
+}
+
+/* ══ NAV ══ */
+function goPage(name, btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.getElementById('page-'+name).classList.add('on');
+  document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  document.getElementById('backbtn').classList.toggle('show', name!=='home');
+  pageHist.push(name);
+  if(name==='library'){ renderRecent(); renderCatBars(); }
+  if(name==='admin'){ renderAdminStats(); showOverdueAlerts(); }
+}
+function goBack(){
+  pageHist.pop();
+  const prev = pageHist.length?pageHist[pageHist.length-1]:'home';
+  pageHist = [];
+  const nl = document.querySelectorAll('.nbtn');
+  const ns = ['home','library','admin'];
+  goPage(prev, nl[ns.indexOf(prev)]);
+}
+
+/* ══ GLOBAL SEARCH ══ */
+function globalSearch(q){
+  const box = document.getElementById('gsearch-results');
+  if(!q||q.length<2){ box.classList.remove('show'); return; }
+  const ql = q.toLowerCase();
+  const results = [];
+  BOOKS.filter(b=>b.title.toLowerCase().includes(ql)||b.author.toLowerCase().includes(ql))
+    .slice(0,4).forEach(b=>results.push({icon:b.type==='Physical'?'🍀':'🌙',title:b.title,sub:b.author+' · '+b.stat,action:()=>{ openType(b.type); }}));
+  MEMBERS.filter(m=>m.name.toLowerCase().includes(ql)||m.email.toLowerCase().includes(ql))
+    .slice(0,2).forEach(m=>results.push({icon:'🌻',title:m.name,sub:m.email,action:()=>{ if(currentRole==='admin'){ const nl=document.querySelectorAll('.nbtn');goPage('admin',nl[2]);swAdmin('ap-mem',document.querySelector('.atab:nth-child(4)')); }}}));
+  BORROW_RECORDS.filter(r=>r.name.toLowerCase().includes(ql)||r.book.toLowerCase().includes(ql))
+    .slice(0,2).forEach(r=>results.push({icon:'🎀',title:r.book,sub:r.name+' · '+r.stat,action:()=>{ if(currentRole==='admin'){ const nl=document.querySelectorAll('.nbtn');goPage('admin',nl[2]); }}}));
+  if(!results.length){ box.innerHTML='<div class="gs-none">No results for "'+q+'"</div>'; box.classList.add('show'); return; }
+  box.innerHTML = results.map((r,i)=>`<div class="gs-item" onclick="gsResults[${i}].action();document.getElementById('gsearch').value='';document.getElementById('gsearch-results').classList.remove('show')"><span class="gs-item-icon">${r.icon}</span><div><div class="gs-item-title">${r.title}</div><div class="gs-item-sub">${r.sub}</div></div></div>`).join('');
+  window.gsResults = results;
+  box.classList.add('show');
+}
+
+/* ══ CHOOSER ══ */
+function openType(type){
+  const nl = document.querySelectorAll('.nbtn');
+  goPage('library', nl[1]);
+  showFilt(type);
+  setTimeout(()=>document.getElementById('filt-wrap').scrollIntoView({behavior:'smooth',block:'start'}), 80);
+}
+function showFilt(type){
+  const fl = BOOKS.filter(b=>b.type===type);
+  document.getElementById('filt-title').innerHTML = (type==='Physical'?'🍀 Physical Books':'🌙 eBooks')+' ('+fl.length+')';
+  document.getElementById('ftbtn-phy').className = 'ftype-btn'+(type==='Physical'?' ap':'');
+  document.getElementById('ftbtn-dig').className = 'ftype-btn'+(type==='Digital'?' ad':'');
+  document.getElementById('mini-cphy').className = 'mini-ccard phy'+(type==='Physical'?' sel':'');
+  document.getElementById('mini-cdig').className = 'mini-ccard dig'+(type==='Digital'?' sel':'');
+  document.getElementById('filt-body').innerHTML = fl.length?fl.map(b=>{
+    const st = getBookStat(b);
+    const barcode = b.type==='Physical' ? (b.bc || '—') : '—';
+    return `<tr><td>${b.id}</td>
+    <td><div class="tdm td-wrap">${b.title}</div><div class="tds">${b.author}</div></td>
+    <td>${b.cat}</td><td>${barcode}</td>
+    <td><span class="bdg ${st.cls}">${st.label}</span></td>
+    <td>${userActionBtn(b,type)}</td></tr>`;
+  }).join('')
+  :'<tr><td colspan="6"><div class="empty"><span>🌸</span>No '+type+' books found.</div></td></tr>';
+  document.getElementById('filt-wrap').style.display='block';
+}
+function userActionBtn(b, type){
+  const st = getBookStat(b);
+  if(currentRole==='admin') return `<div class="actrow"><button class="ibtn" onclick="openEditBook(${b.id})">✍️</button><button class="ibtn" style="background:#fde" onclick="deleteBook(${b.id})">🗑️</button></div>`;
+  if(!currentUserEmail) return `<button class="pbtn b" style="font-size:6px;padding:5px 8px" onclick="toast('🌸 Please log in first!','er')">🔒 Login to ${type==='Physical'?'Borrow':'Buy'}</button>`;
+  if(type==='Physical'){
+    if(st.cls==='bw') return '<span class="bdg bw">No Copies Left</span>';
+    return `<button class="pbtn g" style="font-size:6px;padding:5px 8px" onclick="openBorrowM(${b.id})">🎀 BORROW</button>`;
+  }
+  return getEbookActionBtn(b);
+}
+function clearFilt(){
+  document.getElementById('filt-wrap').style.display='none';
+  document.getElementById('ftbtn-phy').className='ftype-btn';
+  document.getElementById('ftbtn-dig').className='ftype-btn';
+  document.getElementById('mini-cphy').className='mini-ccard phy';
+  document.getElementById('mini-cdig').className='mini-ccard dig';
+}
+
+/* ══ BOOK STATUS ══ */
+function getBookStat(b){
+  if(b.type==='Digital') return {label:'Unlimited',cls:'pd'};
+  const avail = b.available_copies ?? Math.max(0,(b.stocks||1)-(b.borrowed_count||0));
+  if(avail<=0) return {label:'No Copies Left',cls:'bw'};
+  if(avail===1) return {label:'1 Copy Left',cls:'pn'};
+  return {label:'Available ('+avail+')',cls:'av'};
+}
+
+/* ══ LIBRARY ROWS ══ */
+function brow(b){
+  const st = getBookStat(b);
+  const avail = b.available_copies ?? Math.max(0,(b.stocks||1)-(b.borrowed_count||0));
+  let act='';
+  if(currentRole==='admin'){
+    act=`<div class="actrow"><button class="ibtn" onclick="openEditBook(${b.id})">✍️</button><button class="ibtn" style="background:#fde" onclick="deleteBook(${b.id})">🗑️</button></div>`;
+  } else if(!currentUserEmail){
+    act=`<button class="pbtn b" style="font-size:6px;padding:5px 8px" onclick="toast('🌸 Please log in to borrow!','er')">🔒 Login</button>`;
+  } else if(b.type==='Physical'){
+    act=st.cls==='bw'?'<span class="bdg bw">No Copies</span>':`<button class="pbtn g" style="font-size:6px;padding:5px 8px" onclick="openBorrowM(${b.id})">🎀 BORROW</button>`;
+  } else {
+    act=getEbookActionBtn(b);
+  }
+  const copiesLine = b.type==='Physical'
+    ?`<div style="font-family:'VT323',monospace;font-size:13px;color:var(--wood);margin-top:2px">${avail} of ${b.stocks||1} copies left</div>`:'';
+  return `<tr><td>${b.id}</td><td><div class="tdm td-wrap">${b.title}</div><div class="tds">${b.author}</div></td><td>${b.cat}</td><td><span class="bdg ${b.type==='Physical'?'phy':'dig'}">${b.type==='Physical'?'Physical':'eBook'}</span></td><td><span class="bdg ${st.cls}">${st.label}</span>${copiesLine}</td><td>${act}</td></tr>`;
+}
+function phyRow(b){
+  const avail = b.available_copies ?? Math.max(0,(b.stocks||1)-(b.borrowed_count||0));
+  const sc = avail<=0?'bw':avail===1?'pn':'av';
+  let act='';
+  if(currentRole==='admin') act=`<div class="actrow"><button class="ibtn" onclick="openEditBook(${b.id})">✍️</button><button class="ibtn" style="background:#fde" onclick="deleteBook(${b.id})">🗑️</button></div>`;
+  else if(!currentUserEmail) act=`<button class="pbtn b" style="font-size:6px;padding:5px 8px" onclick="toast('🌸 Please log in first!','er')">🔒 Login</button>`;
+  else if(avail<=0) act='<span class="bdg bw">No Copies</span>';
+  else act=`<button class="pbtn g" style="font-size:6px;padding:5px 8px" onclick="openBorrowM(${b.id})">🎀 BORROW</button>`;
+  return `<tr><td>${b.id}</td><td><div class="tdm td-wrap">${b.title}</div><div class="tds">${b.author}</div></td><td>${b.cat}</td>
+    <td>
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font-family:'Press Start 2P',monospace;font-size:9px;color:${avail===0?'var(--red)':avail===1?'var(--orange)':'var(--grass)'}">${avail} / ${b.stocks||1}</div>
+        <div style="background:var(--cream3);height:6px;width:55px;border:1px solid var(--soil3);overflow:hidden"><div style="height:100%;width:${(b.stocks||1)>0?Math.round(avail/(b.stocks||1)*100):0}%;background:${avail===0?'var(--red)':avail===1?'var(--orange)':'var(--grass)'}"></div></div>
+      </div>
+    </td>
+    <td><span class="bdg ${sc}">${avail<=0?'No Copies':avail===1?'1 Left':avail+' Available'}</span></td>
+    <td>${act}</td></tr>`;
+}
+function digRow(b){
+  let act='';
+  if(currentRole==='admin') act=`<div class="actrow"><button class="ibtn" onclick="openEditBook(${b.id})">✍️</button><button class="ibtn" style="background:#fde" onclick="deleteBook(${b.id})">🗑️</button></div>`;
+  else if(!currentUserEmail) act=`<button class="pbtn b" style="font-size:6px;padding:5px 8px" onclick="toast('🌸 Please log in first!','er')">🔒 Login</button>`;
+  else act=getEbookActionBtn(b);
+  const owned = currentRole!=='admin' && userOwnsEbook(b.id);
+  return `<tr><td>${b.id}</td><td><div class="tdm td-wrap">${b.title}</div><div class="tds">${b.author}</div></td><td>${b.cat}</td>
+    <td style="font-family:'Press Start 2P',monospace;font-size:7px">₱${b.price}</td>
+    <td><span class="bdg ${owned?'av':'pd'}">${owned?'Owned':'● Unlimited'}</span></td>
+    <td>${act}</td></tr>`;
+}
+
+/* ══ RENDER LIBRARY ══ */
+function renderRecent(pg){
+  if(pg!==undefined) libPage=pg;
+  const phy = BOOKS.filter(b=>b.type==='Physical');
+  const dig = BOOKS.filter(b=>b.type==='Digital');
+  const borrowedScopeCurrentUser = currentRole === 'user';
+  const borrowedBooks = BOOKS.filter(b=>b.type==='Physical' && getActiveBorrowsForBook(b.id, borrowedScopeCurrentUser).length>0);
+  let allList = libTypeFilter==='Physical'?phy:libTypeFilter==='Digital'?dig:BOOKS;
+  const start=(libPage-1)*LIB_PER_PAGE;
+  const pageItems=allList.slice(start,start+LIB_PER_PAGE);
+  const tbody=document.getElementById('rbody');
+  if(tbody) tbody.innerHTML=pageItems.length?pageItems.map(brow).join(''):'<tr><td colspan="6"><div class="empty"><span>📚</span>No books here yet.</div></td></tr>';
+  const pb=document.getElementById('phybody'); if(pb) pb.innerHTML=phy.map(phyRow).join('');
+  const db=document.getElementById('digbody'); if(db) db.innerHTML=dig.map(digRow).join('');
+  const avb=document.getElementById('avbody'); if(avb) avb.innerHTML=BOOKS.filter(b=>getBookStat(b).cls!=='bw').map(brow).join('');
+  const bwb=document.getElementById('bwbody'); if(bwb) bwb.innerHTML=borrowedBooks.length?borrowedBooks.map(b=>borrowedCatalogRow(b, borrowedScopeCurrentUser)).join(''):'<tr><td colspan="6"><div class="empty"><span>🎀</span>No borrowed books found.</div></td></tr>';
+}
+
+/* ══ LIVE SEARCH ══ */
+function liveSearch(val){
+  const q=val.toLowerCase().trim();
+  if(!q){ renderRecent(); return; }
+  const fl=BOOKS.filter(b=>
+    b.title.toLowerCase().includes(q)||
+    b.author.toLowerCase().includes(q)||
+    b.cat.toLowerCase().includes(q)||
+    (b.bc&&b.bc.toLowerCase().includes(q))
+  );
+  const borrowedScopeCurrentUser = currentRole === 'user';
+  const rbody=document.getElementById('rbody');
+  if(rbody) rbody.innerHTML=fl.length?fl.map(brow).join(''):'<tr><td colspan="6"><div class="empty"><span>🔍</span>No books found for &quot;'+val+'&quot;</div></td></tr>';
+  const avb=document.getElementById('avbody'); if(avb) avb.innerHTML=fl.filter(b=>getBookStat(b).cls!=='bw').map(brow).join('');
+  const bwb=document.getElementById('bwbody'); if(bwb){ const rows=fl.filter(b=>b.type==='Physical'&&getActiveBorrowsForBook(b.id, borrowedScopeCurrentUser).length>0); bwb.innerHTML=rows.length?rows.map(b=>borrowedCatalogRow(b, borrowedScopeCurrentUser)).join(''):'<tr><td colspan="6"><div class="empty"><span>🎀</span>No borrowed books found.</div></td></tr>'; }
+  const pb=document.getElementById('phybody'); if(pb) pb.innerHTML=fl.filter(b=>b.type==='Physical').map(phyRow).join('');
+  const db=document.getElementById('digbody'); if(db) db.innerHTML=fl.filter(b=>b.type==='Digital').map(digRow).join('');
+}
+function setSF(m){
+  sfMode=m;
+  document.getElementById('fb-au').style.background=m==='author'?'var(--hay2)':'';
+  document.getElementById('fb-ti').style.background=m==='title'?'var(--hay2)':'';
+  sSearch();
+}
+function sSearch(){
+  const val=document.getElementById('ssearch').value.toLowerCase();
+  if(!val){ renderRecent(); return; }
+  const fl=BOOKS.filter(b=>{
+    if(sfMode==='author') return b.author.toLowerCase().includes(val);
+    return b.title.toLowerCase().includes(val)||b.author.toLowerCase().includes(val)||b.cat.toLowerCase().includes(val);
+  });
+  const borrowedScopeCurrentUser = currentRole === 'user';
+  document.getElementById('rbody').innerHTML=fl.length?fl.map(brow).join(''):'<tr><td colspan="6"><div class="empty"><span>🔍</span>No books found for "'+val+'"</div></td></tr>';
+  const avb=document.getElementById('avbody'); if(avb) avb.innerHTML=fl.filter(b=>getBookStat(b).cls!=='bw').map(brow).join('');
+  const bwb=document.getElementById('bwbody'); if(bwb){ const rows=fl.filter(b=>b.type==='Physical'&&getActiveBorrowsForBook(b.id, borrowedScopeCurrentUser).length>0); bwb.innerHTML=rows.length?rows.map(b=>borrowedCatalogRow(b, borrowedScopeCurrentUser)).join(''):'<tr><td colspan="6"><div class="empty"><span>🎀</span>No borrowed books found.</div></td></tr>'; }
+}
+
+/* ══ CATEGORY BARS ══ */
+function renderCatBars(){
+  const cats={};
+  BOOKS.forEach(b=>{ cats[b.cat]=(cats[b.cat]||0)+1; });
+  const total=BOOKS.length||1;
+  const el=document.getElementById('cat-bars');
+  if(!el) return;
+  el.innerHTML=Object.entries(cats).sort((a,b)=>b[1]-a[1]).map(([cat,cnt])=>`
+    <div style="margin-bottom:7px">
+      <div style="display:flex;justify-content:space-between;font-family:'VT323',monospace;font-size:15px;color:var(--soil2)"><span>${cat}</span><span>${cnt}</span></div>
+      <div style="background:var(--cream3);height:8px;border:1px solid var(--soil3)"><div style="height:100%;width:${Math.round(cnt/total*100)}%;background:var(--teal)"></div></div>
+    </div>`).join('');
+}
+
+/* ══ INIT COUNTS ══ */
+function initCounts(){
+  const phy=BOOKS.filter(b=>b.type==='Physical');
+  const dig=BOOKS.filter(b=>b.type==='Digital');
+  const phyAv=phy.filter(b=>( b.available_copies ?? Math.max(0,(b.stocks||1)-(b.borrowed_count||0)) )>0).length;
+  const digAv=dig.length;
+  document.getElementById('cnt-phy').textContent=phy.length+' titles';
+  document.getElementById('cnt-dig').textContent=dig.length+' titles';
+  document.getElementById('avail-phy').textContent=phyAv+' available now';
+  document.getElementById('avail-dig').textContent='Unlimited access';
+  document.getElementById('mini-cnt-phy').textContent=phy.length+' titles · '+phyAv+' available';
+  document.getElementById('mini-cnt-dig').textContent=dig.length+' titles · Unlimited';
+  document.getElementById('totbk').textContent=BOOKS.length;
+  const spt=document.getElementById('stat-phy-total'); if(spt) spt.textContent=phy.length;
+  const spt2=document.getElementById('stat-phy-total2'); if(spt2) spt2.textContent=phy.length;
+  const spa=document.getElementById('stat-phy-avail'); if(spa) spa.textContent=phyAv;
+  const sdt=document.getElementById('stat-dig-total'); if(sdt) sdt.textContent=dig.length;
+}
+
+/* ══ HOME EXTRAS ══ */
+function renderHomeExtras(){
+  const recent=[...BOOKS].sort((a,b)=>b.id-a.id).slice(0,4);
+  const rb=document.getElementById('home-recent-books');
+  if(rb) rb.innerHTML=recent.map(b=>{
+    const st=getBookStat(b);
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--cream2)">
+      <span style="background:${b.type==='Physical'?'var(--bp)':'var(--teal2)'};color:${b.type==='Physical'?'var(--hay)':'white'};font-family:'Press Start 2P',monospace;font-size:5px;padding:3px 6px;white-space:nowrap">${b.type==='Physical'?'PHY':'eBK'}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--soil3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.title}</div>
+        <div style="font-family:'VT323',monospace;font-size:13px;color:var(--wood)">${b.author}</div>
+      </div>
+      <span class="bdg ${st.cls}" style="font-size:5px;padding:2px 6px">${st.cls==='pd'?'∞':st.label}</span>
+    </div>`;
+  }).join('');
+  const phyTotal=BOOKS.filter(b=>b.type==='Physical').length;
+  const digTotal=BOOKS.filter(b=>b.type==='Digital').length;
+  const phyAvail=BOOKS.filter(b=>b.type==='Physical').filter(b=>(b.available_copies??Math.max(0,(b.stocks||1)-(b.borrowed_count||0)))>0).length;
+  const overdueCount=BORROW_RECORDS.filter(r=>r.stat==='Overdue').length;
+  const gl=document.getElementById('home-glance');
+  if(gl) gl.innerHTML=[
+    ['📖','Physical Books',phyTotal],
+    ['🌙','eBooks',digTotal],
+    ['✅','Available Physical',phyAvail+' / '+phyTotal],
+    ['🎀','Currently Borrowed',BORROW_RECORDS.filter(r=>r.stat!=='Returned').length],
+    ['⚠️','Overdue',overdueCount,(overdueCount>0?'var(--red)':'var(--grass)')],
+    ['👥','Registered Members',MEMBERS.length],
+  ].map(([ic,lb,vl,col])=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:3px 0;border-bottom:1px solid var(--cream2)">
+    <span>${ic} ${lb}</span>
+    <strong style="color:${col||'var(--soil3)'}">  ${vl}</strong>
+  </div>`).join('');
+}
+
+/* ══ ADMIN STATS ══ */
+function renderAdminStats(){
+  const rev=BILLING.filter(b=>b.stat==='Paid').reduce((s,b)=>s+b.amt,0);
+  const od=BORROW_RECORDS.filter(r=>r.stat==='Overdue').length;
+  const active=BORROW_RECORDS.filter(r=>r.stat!=='Returned').length;
+  const pending=BILLING.filter(b=>b.stat==='Pending').length;
+  const el=document.getElementById('admin-stat-cards');
+  if(!el) return;
+  el.innerHTML=`
+    <div class="asc"><span class="asc-icon">📦</span><div><div class="asc-lbl">Total Books</div><div class="asc-val">${BOOKS.length}</div></div></div>
+    <div class="asc"><span class="asc-icon">🎀</span><div><div class="asc-lbl">Borrowed</div><div class="asc-val">${active}</div></div></div>
+    <div class="asc danger"><span class="asc-icon">⚠️</span><div><div class="asc-lbl">Overdue</div><div class="asc-val">${od}</div></div></div>
+    <div class="asc"><span class="asc-icon">🌻</span><div><div class="asc-lbl">Members</div><div class="asc-val">${MEMBERS.length}</div></div></div>
+    <div class="asc"><span class="asc-icon">🪙</span><div><div class="asc-lbl">Revenue</div><div class="asc-val" style="font-size:14px">₱${rev.toLocaleString()}</div></div></div>
+    <div class="asc"><span class="asc-icon">⏳</span><div><div class="asc-lbl">Pending Pay</div><div class="asc-val">${pending}</div></div></div>
+  `;
+  renderAdminCharts();
+}
+
+/* ══ CHART DATE RANGE ══ */
+function setChartRange(months) {
+  const to   = new Date();
+  const from = new Date();
+  const fmt  = d => d.toISOString().split('T')[0];
+  if (months === 0) {
+    // All time — find earliest billing date
+    const dates = BILLING.filter(b=>b.stat==='Paid').map(b=>(b.date||b.effective_date||b.billing_date||b.created_date||'').slice(0,10)).filter(Boolean).sort();
+    document.getElementById('chart-date-from').value = dates[0] || fmt(new Date(new Date().setFullYear(new Date().getFullYear()-2)));
+  } else {
+    from.setMonth(from.getMonth() - months);
+    document.getElementById('chart-date-from').value = fmt(from);
+  }
+  document.getElementById('chart-date-to').value = fmt(to);
+  renderAdminCharts();
+}
+
+let _chartRev=null, _chartBrw=null;
+function renderAdminCharts(){
+  if(typeof Chart==='undefined') return;
+  // Dynamic date range from inputs
+  const fromInp=document.getElementById('chart-date-from');
+  const toInp=document.getElementById('chart-date-to');
+  if(!fromInp||!toInp) return;
+  if(!fromInp.value){ const d=new Date(); d.setMonth(d.getMonth()-6); fromInp.value=d.toISOString().split('T')[0]; }
+  if(!toInp.value){ toInp.value=new Date().toISOString().split('T')[0]; }
+  const fromDate=new Date(fromInp.value);
+  const toDate=new Date(toInp.value);
+  const months=[];
+  const cur=new Date(fromDate.getFullYear(),fromDate.getMonth(),1);
+  const endM=new Date(toDate.getFullYear(),toDate.getMonth(),1);
+  while(cur<=endM){ months.push({key:cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'),label:cur.toLocaleString('default',{month:'short',year:'2-digit'})}); cur.setMonth(cur.getMonth()+1); }
+  if(!months.length) return;
+  const lastKey=months[months.length-1].key;
+  const revData=months.map(m=>BILLING.filter(b=>{
+    if(b.stat!=='Paid') return false;
+    const raw=b.date||b.effective_date||b.billing_date||b.created_date||'';
+    return (raw.slice(0,7)||lastKey)===m.key;
+  }).reduce((s,b)=>s+b.amt,0));
+  const revTotal=revData.reduce((s,v)=>s+v,0);
+  const sub=document.getElementById('chart-rev-subtitle');
+  if(sub) sub.textContent='Total: ₱'+revTotal.toLocaleString();
+  const brwData=months.map(m=>BORROW_RECORDS.filter(r=>(r.borrowed||'').startsWith(m.key)).length);
+  const brwTotal=brwData.reduce((s,v)=>s+v,0);
+  const bsub=document.getElementById('chart-brw-subtitle');
+  if(bsub) bsub.textContent='Total: '+brwTotal;
+  const labels=months.map(m=>m.label);
+  const chartDefaults={
+    responsive:true, maintainAspectRatio:false,
+    plugins:{ legend:{display:false} },
+    scales:{
+      x:{ grid:{color:'rgba(59,37,16,.08)'}, ticks:{color:'#7a4a26',font:{size:10}} },
+      y:{ grid:{color:'rgba(59,37,16,.08)'}, ticks:{color:'#7a4a26',font:{size:10},stepSize:1,callback:v=>Number.isInteger(v)?v:''}, beginAtZero:true }
+    }
+  };
+  const rCtx=document.getElementById('chart-revenue');
+  if(rCtx){ if(_chartRev){_chartRev.destroy();_chartRev=null;}
+    _chartRev=new Chart(rCtx,{type:'bar',data:{labels,datasets:[{label:'Revenue (₱)',data:revData,backgroundColor:'rgba(46,139,122,.65)',borderColor:'#2e8b7a',borderWidth:2,borderRadius:3,hoverBackgroundColor:'rgba(46,139,122,.9)'}]},
+      options:{...chartDefaults,plugins:{...chartDefaults.plugins,tooltip:{callbacks:{label:ctx=>'₱'+ctx.parsed.y.toLocaleString()}}},
+        scales:{...chartDefaults.scales,y:{...chartDefaults.scales.y,ticks:{...chartDefaults.scales.y.ticks,callback:v=>'₱'+v.toLocaleString()}}}}});
+  }
+  const bCtx=document.getElementById('chart-borrows');
+  if(bCtx){ if(_chartBrw){_chartBrw.destroy();_chartBrw=null;}
+    _chartBrw=new Chart(bCtx,{type:'line',data:{labels,datasets:[{label:'Borrows',data:brwData,borderColor:'#c0392b',backgroundColor:'rgba(192,57,43,.15)',borderWidth:2.5,pointBackgroundColor:'#c0392b',pointRadius:4,fill:true,tension:.35}]},options:chartDefaults});
+  }
+}
+
+/* ══ BORROW MODAL ══ */
+function openBorrowM(bid){
+  const b=BOOKS.find(x=>x.id===bid); if(!b) return;
+  document.getElementById('bw-bname').textContent=b.title;
+  document.getElementById('bw-book').value=b.title;
+  // Store book id on the modal element itself
+  document.getElementById('modal-borrow').dataset.bookId=bid;
+  set('bw-name',currentUserName||''); set('bw-email',currentUserEmail||''); set('bw-contact',currentUserContact||'');
+  const due=new Date(); due.setDate(due.getDate()+14);
+  set('bw-due', due.toISOString().split('T')[0]);
+  openM('modal-borrow');
+}
+
+async function saveBorrow(){
+  const n=v('bw-name'), e=v('bw-email'), c=v('bw-contact'), d=v('bw-due');
+  const bookId=parseInt(document.getElementById('modal-borrow').dataset.bookId||0);
+  if(!n||!e||!c||!d){ toast('Please fill all fields!','er'); return; }
+  const today=new Date().toISOString().split('T')[0];
+  const res=await api('borrows.php','POST',{
+    action:'borrow', user_id:currentUserId||null,
+    book_id:bookId, borrower_name:n, email:e, contact:c,
+    date_borrowed:today, due_date:d
+  });
+  if(res.success){
+    await loadAll();
+    renderAll(); closeM('modal-borrow');
+    toast('🎀 Borrowed! Due: '+d,'ok');
+  } else { toast(res.error||'Borrow failed!','er'); }
+}
+
+/* ══ BORROW DETAIL (admin) ══ */
+function openBorrowDetail(id){
+  const r=BORROW_RECORDS.find(x=>x.id===id); if(!r) return;
+  document.getElementById('bd-id').value=r.id;
+  document.getElementById('bd-name').value=r.name;
+  document.getElementById('bd-email').value=r.email;
+  document.getElementById('bd-contact').value=r.contact;
+  document.getElementById('bd-book').value=r.book;
+  document.getElementById('bd-borrowed').value=r.borrowed;
+  document.getElementById('bd-due').value=r.due;
+  document.getElementById('bd-stat').value=r.stat;
+  openM('modal-brw-detail');
+}
+
+async function saveBorrowRecord(){
+  const id=parseInt(document.getElementById('bd-id').value);
+  const ns=document.getElementById('bd-stat').value;
+  const res=await api('borrows.php','PUT',{
+    id, borrower_name:document.getElementById('bd-name').value,
+    email:document.getElementById('bd-email').value,
+    contact:document.getElementById('bd-contact').value,
+    due_date:document.getElementById('bd-due').value,
+    status:ns
+  });
+  if(res.success){
+    await loadAll(); closeM('modal-brw-detail'); renderAll(); showOverdueAlerts();
+    toast('🌸 Record updated!','ok');
+  } else { toast(res.error||'Update failed!','er'); }
+}
+
+async function markReturned(id){
+  const res=await api('borrows.php','POST',{ action:'return', id });
+  if(res.success){
+    await loadAll(); renderAll(); showOverdueAlerts();
+    toast('✅ Marked as returned! Book is now available.','ok');
+  } else { toast(res.error||'Return failed!','er'); }
+}
+
+/* ══ EBOOK PAYMENT ══ */
+function openEbookM(bid){
+  const b=BOOKS.find(x=>x.id===bid); if(!b) return;
+  if(userOwnsEbook(bid)){
+    toast('You already own this eBook. Opening your copy instead.','ok');
+    openOwnedEbook(bid);
+    return;
+  }
+  pendingEbookId=bid;
+  document.getElementById('eb-bname').textContent=b.title;
+  document.getElementById('eb-book').value=b.title;
+  document.getElementById('eb-amount').value=b.price;
+  ['eb-step-1','eb-step-2','eb-step-3'].forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  document.getElementById('eb-step-1').style.display='block';
+  document.getElementById('eb-success-step').style.display='none';
+  document.getElementById('eb-mfoot').style.display='none';
+  ['eb-name','eb-email','eb-contact','eb-ref'].forEach(id=>set(id,''));
+  set('eb-name',currentUserName||''); set('eb-email',currentUserEmail||''); set('eb-contact',currentUserContact||'');
+  openM('modal-ebook');
+}
+
+async function processPayment(){
+  const n=v('eb-name'), e=v('eb-email'), c=v('eb-contact');
+  const b=BOOKS.find(x=>x.id===pendingEbookId);
+  const methodEl=document.getElementById('eb-method-label');
+  const method=methodEl?methodEl.textContent:'GCash';
+  closeM('modal-ebook');
+  document.getElementById('pay-processing').classList.add('show');
+  const res=await api('billing.php','POST',{
+    user_id:currentUserId||null,
+    book_id:pendingEbookId,
+    member_name:n, member_email:e, contact:c,
+    book_title:b?b.title:'—',
+    amount:b?b.price:0,
+    mode_of_payment:method,
+    billing_date:new Date().toISOString().split('T')[0],
+  });
+  setTimeout(async ()=>{
+    document.getElementById('pay-processing').classList.remove('show');
+    if(res.success){
+      await loadAll();
+      const refCode=res.reference_number||'REF-'+Math.random().toString(36).substring(2,8).toUpperCase();
+      renderBilling(); renderAdminStats(); renderBwDash();
+      document.getElementById('eb-success-step').style.display='block';
+      document.getElementById('eb-mfoot').style.display='flex';
+      document.getElementById('eb-success-ref').textContent='Ref: '+refCode;
+      openM('modal-ebook');
+      toast('✅ Payment confirmed! Ref: '+refCode,'ok');
+    } else { toast(res.error||'Payment failed!','er'); openM('modal-ebook'); }
+  }, 1800);
+}
+
+/* ══ XENDIT STEP HELPERS ══ */
+let selectedXMethod='';
+function ebStep2(){
+  const n=v('eb-name'),e=v('eb-email'),c=v('eb-contact');
+  if(!n||!e||!c){ toast('Please fill all your details first!','er'); return; }
+  document.getElementById('eb-step-1').style.display='none';
+  document.getElementById('eb-step-2').style.display='block';
+  document.getElementById('eb-amount-disp2').textContent=document.getElementById('eb-amount').value;
+  selectedXMethod='';
+  document.querySelectorAll('.xpay-opt').forEach(el=>el.classList.remove('sel'));
+  document.getElementById('eb-proceed-btn').disabled=true;
+  document.getElementById('eb-proceed-btn').style.opacity='.4';
+}
+function ebBack1(){ document.getElementById('eb-step-2').style.display='none'; document.getElementById('eb-step-1').style.display='block'; }
+function ebBack2(){ document.getElementById('eb-step-3').style.display='none'; document.getElementById('eb-step-2').style.display='block'; }
+function selectXMethod(type,label){
+  selectedXMethod=type;
+  document.querySelectorAll('.xpay-opt').forEach(el=>el.classList.remove('sel'));
+  event.currentTarget.classList.add('sel');
+  document.getElementById('eb-proceed-btn').disabled=false;
+  document.getElementById('eb-proceed-btn').style.opacity='1';
+}
+function fmtCard(inp){ let val=inp.value.replace(/\D/g,'').substring(0,16); inp.value=val.replace(/(.{4})/g,'$1 ').trim(); }
+function ebStep3(){
+  if(!selectedXMethod){ toast('Please select a payment method!','er'); return; }
+  document.getElementById('eb-step-2').style.display='none';
+  document.getElementById('eb-step-3').style.display='block';
+  document.getElementById('eb-amount-disp3').textContent=document.getElementById('eb-amount').value;
+  const lbl=document.querySelectorAll('.xpay-opt.sel')[0]?.querySelector('div:last-child')?.textContent||selectedXMethod;
+  document.getElementById('eb-method-label').textContent=lbl;
+  ['gcash','card','bank'].forEach(id=>document.getElementById('eb-'+id+'-ui').style.display='none');
+  if(selectedXMethod==='gcash'||selectedXMethod==='maya'||selectedXMethod==='shopee'){
+    document.getElementById('eb-gcash-ui').style.display='block';
+  } else if(selectedXMethod==='card'){
+    document.getElementById('eb-card-ui').style.display='block';
+  } else {
+    document.getElementById('eb-bank-ui').style.display='block';
+    document.getElementById('eb-bank-name').textContent=lbl;
+  }
+}
+
+/* ══ INVENTORY (admin) ══ */
+function renderInventory(){
+  const el=document.getElementById('inv-body'); if(!el) return;
+  const fl=invFilter==='All'?BOOKS:BOOKS.filter(b=>b.type===invFilter);
+  const today=new Date().toISOString().split('T')[0];
+  el.innerHTML=fl.length?fl.map(b=>{
+    const avail=b.type==='Physical'?(b.available_copies??Math.max(0,(b.stocks||1)-(b.borrowed_count||0))):null;
+    const sc=b.type==='Physical'?(avail<=0?'bw':avail===1?'pn':'av'):'pd';
+    const stockCell=b.type==='Physical'?`
+      <div style="display:flex;flex-direction:column;gap:3px">
+        <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:${avail===0?'var(--red)':avail===1?'var(--orange)':'var(--grass)'}">${avail}/${b.stocks}</div>
+        <div style="background:var(--cream3);height:6px;width:50px;border:1px solid var(--soil3)"><div style="height:100%;width:${b.stocks>0?Math.round(avail/b.stocks*100):0}%;background:${avail===0?'var(--red)':avail===1?'var(--orange)':'var(--grass)'}"></div></div>
+      </div>`:`<span style="font-family:'VT323',monospace;font-size:15px;color:var(--teal)">∞</span>`;
+    // Active borrowers for this book
+    const activeBorrows=BORROW_RECORDS.filter(r=>r.bookId===b.id && r.stat!=='Returned');
+    const borrowerCell = b.type==='Physical' && activeBorrows.length > 0
+      ? activeBorrows.map(r=>{
+          const isOd=r.stat==='Overdue';
+          const daysLeft=r.stat==='Active'?Math.ceil((new Date(r.due)-new Date(today))/(1000*60*60*24)):null;
+          const fine=isOd?Math.floor((new Date(today)-new Date(r.due))/(1000*60*60*24))*5:0;
+          return `<div style="background:${isOd?'rgba(192,57,43,.1)':'rgba(90,173,42,.08)'};border:1px solid ${isOd?'var(--red)':'var(--grass)'};padding:5px 8px;margin-bottom:3px;min-width:140px">
+            <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--soil3);margin-bottom:2px">${r.name}</div>
+            <div style="font-family:'VT323',monospace;font-size:13px;color:var(--wood)">${r.email}</div>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+              <span style="font-family:'VT323',monospace;font-size:13px;color:var(--wood2)">Due: <strong style="color:${isOd?'var(--red)':daysLeft!==null&&daysLeft<=2?'var(--orange)':'var(--soil3)'}">${r.due}</strong></span>
+              <span class="bdg ${isOd?'od':'ac'}" style="font-size:5px;padding:2px 5px">${isOd?'Overdue':'Active'}</span>
+              ${isOd?`<span style="font-family:'Press Start 2P',monospace;font-size:5px;color:var(--red)">₱${fine} fine</span>`:''}
+              ${daysLeft!==null?`<span style="font-family:'VT323',monospace;font-size:12px;color:${daysLeft<=2?'var(--red)':'var(--grass)'}">${daysLeft}d left</span>`:''}
+            </div>
+            <button onclick="markReturned(${r.id})" style="font-family:'Press Start 2P',monospace;font-size:5px;background:var(--grass);color:white;border:1px solid var(--soil3);padding:3px 6px;cursor:pointer;margin-top:3px">✅ Mark Returned</button>
+          </div>`;
+        }).join('')
+      : b.type==='Physical'
+        ? `<span style="font-family:'VT323',monospace;font-size:15px;color:var(--grass)">— None —</span>`
+        : `<span style="font-family:'VT323',monospace;font-size:14px;color:var(--teal)">eBook (no borrow)</span>`;
+    return `<tr>
+      <td>${b.id}</td>
+      <td><div class="tdm td-wrap">${b.title}</div></td>
+      <td><div class="tds">${b.author}</div></td>
+      <td>${b.cat}</td>
+      <td><span class="bdg ${b.type==='Physical'?'phy':'dig'}">${b.type==='Physical'?'📦 Phy':'🌙 eBk'}</span></td>
+      <td>${b.bc||'—'}</td>
+      <td style="font-family:'Press Start 2P',monospace;font-size:7px">${b.price>0?'₱'+b.price:'Free'}</td>
+      <td>${stockCell}</td>
+      <td><span class="bdg ${sc}">${b.type==='Digital'?'Unlimited':avail<=0?'No Copies':avail===1?'1 Left':avail+' Avail'}</span></td>
+      <td style="max-width:220px">${borrowerCell}</td>
+      <td><div class="actrow"><button class="ibtn" onclick="openEditBook(${b.id})">✍️</button><button class="ibtn" style="background:#fde" onclick="deleteBook(${b.id})">🗑️</button></div></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="11"><div class="empty"><span>📦</span>No books.</div></td></tr>';
+}
+let invFilter='All';
+function setInvFilter(f,btn){
+  invFilter=f;
+  document.querySelectorAll('.ftype-btn').forEach(b=>b.className='ftype-btn');
+  if(btn) btn.className='ftype-btn '+(f==='Physical'?'ap':f==='Digital'?'ad':'');
+  renderInventory();
+}
+
+/* ══ BOOK CRUD ══ */
+function syncBookTypeFields(){
+  const typeEl=document.getElementById('b-type');
+  const bcRow=document.getElementById('b-bc-row');
+  const bcInput=document.getElementById('b-bc');
+  if(!typeEl||!bcRow||!bcInput) return;
+  const isDigital=typeEl.value==='Digital';
+  bcRow.style.display=isDigital?'none':'block';
+  bcInput.disabled=isDigital;
+  if(isDigital) bcInput.value='';
+}
+
+function openAddBook(){
+  document.getElementById('b-id').value='';
+  ['b-title','b-auth','b-bc','b-url','b-cover-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';
+  const cf=document.getElementById('b-cover-file'); if(cf) cf.value='';
+  const cp=document.getElementById('b-cover-preview'); if(cp) cp.style.display='none';});
+  const bc=document.getElementById('b-cat'); if(bc) bc.value='Fiction';
+  const bt=document.getElementById('b-type'); if(bt) bt.value='Physical';
+  const bp=document.getElementById('b-price'); if(bp) bp.value='0';
+  const bs=document.getElementById('b-stocks'); if(bs) bs.value='1';
+  document.getElementById('book-modal-title').textContent='🌼 Add New Book';
+  document.getElementById('book-save-btn').textContent='✔ Save Book';
+  syncBookTypeFields();
+  openM('modal-book');
+}
+function openEditBook(id){
+  const b=BOOKS.find(x=>x.id===id); if(!b) return;
+  document.getElementById('b-id').value=b.id;
+  document.getElementById('b-title').value=b.title;
+  document.getElementById('b-auth').value=b.author;
+  document.getElementById('b-cat').value=b.cat;
+  document.getElementById('b-type').value=b.type;
+  document.getElementById('b-bc').value=b.bc||'';
+  document.getElementById('b-url').value=b.url||'';
+  document.getElementById('b-price').value=b.price||0;
+  document.getElementById('b-stocks').value=b.stocks||1;
+  document.getElementById('b-cover-url').value=b.cover||'';
+  const cp=document.getElementById('b-cover-preview');
+  const ci=document.getElementById('b-cover-img');
+  if(b.cover&&cp&&ci){ ci.src=b.cover; cp.style.display='block'; } else if(cp){ cp.style.display='none'; }
+  document.getElementById('book-modal-title').textContent='✍️ Edit Book';
+  document.getElementById('book-save-btn').textContent='✔ Update Book';
+  syncBookTypeFields();
+  openM('modal-book');
+}
+async function saveBook(){
+  const id=parseInt(document.getElementById('b-id').value||0);
+  const title=document.getElementById('b-title').value.trim();
+  const author=document.getElementById('b-auth').value.trim();
+  if(!title||!author){ toast('Title & Author required!','er'); return; }
+  const coverUrl=document.getElementById('b-cover-url')?.value.trim()||'';
+  const coverImg=document.getElementById('b-cover-img');
+  const coverData=(document.getElementById('b-cover-file')?.files?.length&&coverImg?.src?.startsWith('data:'))?coverImg.src:coverUrl;
+  const payload={
+    Title:title,
+    Author:author,
+    cover_url:coverData,
+    Category:document.getElementById('b-cat').value||'General',
+    Type:document.getElementById('b-type').value,
+    Barcode:document.getElementById('b-type').value==='Physical' ? document.getElementById('b-bc').value.trim() : '',
+    URL:document.getElementById('b-url').value.trim(),
+    price:parseFloat(document.getElementById('b-price').value)||0,
+    stocks:parseInt(document.getElementById('b-stocks').value)||1,
+  };
+  let res;
+  if(id){ res=await api('books.php','PUT',{...payload,id}); }
+  else { res=await api('books.php','POST',payload); }
+  if(res.success){ await loadAll(); renderAll(); closeM('modal-book'); toast((id?'✍️ Book updated!':'📦 Book added!'),'ok'); }
+  else { toast(res.message||res.error||'Save failed!','er'); }
+}
+async function deleteBook(id){
+  const b=BOOKS.find(x=>x.id===id);
+  confirmAction('🗑️','Delete Book','Delete "'+b?.title+'"? This cannot be undone.','🗑️ Delete',async()=>{
+    const res=await api('books.php','DELETE',{id});
+    if(res.success){ await loadAll(); renderAll(); toast('🗑️ Book deleted.','ok'); }
+    else { toast(res.error||'Delete failed!','er'); }
+  });
+}
+
+/* ══ BORROWED RECORDS ══ */
+function renderBorrowed(){
+  const el=document.getElementById('brw-body'); if(!el) return;
+  const today=new Date().toISOString().split('T')[0];
+  el.innerHTML=BORROW_RECORDS.length?BORROW_RECORDS.map(r=>{
+    const isOd=r.stat==='Overdue';
+    const daysOd=isOd?Math.floor((new Date(today)-new Date(r.due))/(1000*60*60*24)):0;
+    const fine=r.fine_amount||(isOd?daysOd*5:0);
+    const daysLeft=r.stat==='Active'?Math.ceil((new Date(r.due)-new Date(today))/(1000*60*60*24)):null;
+    return `<tr class="${isOd?'row-overdue':''}">
+      <td>${r.id}</td>
+      <td><div class="tdm">${r.name}</div><div class="tds">${r.email}</div><div class="tds">${r.contact||'—'}</div></td>
+      <td><div class="tdm td-wrap">${r.book}</div></td>
+      <td>${r.borrowed}</td>
+      <td>${r.due}${daysLeft!==null?`<div style="font-family:'VT323',monospace;font-size:12px;color:${daysLeft<=2?'var(--red)':'var(--grass)'}">${daysLeft}d left</div>`:''}</td>
+      <td><span class="bdg ${r.stat==='Active'?'av':r.stat==='Overdue'?'bw':'pd'}">${r.stat}</span>${isOd?`<div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--red);margin-top:4px">₱${fine} fine</div>`:''}</td>
+      <td>
+        <div class="actrow">
+          <button class="ibtn" onclick="openBorrowDetail(${r.id})">✍️</button>
+          ${r.stat!=='Returned'?`<button class="pbtn g" style="font-size:6px;padding:4px 7px" onclick="markReturned(${r.id})">✅</button>`:''}
+        </div>
+      </td></tr>`;
+  }).join(''):'<tr><td colspan="7"><div class="empty"><span>🎀</span>No borrow records.</div></td></tr>';
+  // Stat pills
+  const ac=BORROW_RECORDS.filter(r=>r.stat==='Active').length;
+  const od=BORROW_RECORDS.filter(r=>r.stat==='Overdue').length;
+  const rt=BORROW_RECORDS.filter(r=>r.stat==='Returned').length;
+  const bp=document.getElementById('brw-pills');
+  if(bp) bp.innerHTML=`${pill(ac,'Active','gd')}${pill(od,'Overdue','rd')}${pill(rt,'Returned')}${pill(BORROW_RECORDS.length,'Total')}`;
+}
+
+/* ══ BILLING ══ */
+function renderBilling(){
+  const el=document.getElementById('bilbody'); if(!el) return;
+  const fl=bilFilter==='All'?BILLING:BILLING.filter(b=>b.stat===bilFilter);
+  el.innerHTML=fl.length?fl.map(b=>`
+    <tr><td>${b.id}</td>
+      <td>${b.date}</td>
+      <td><div class="tdm">${b.mem}</div><div class="tds">${b.email||'—'}</div></td>
+      <td><div class="tdm td-wrap">${b.book}</div></td>
+      <td style="font-family:'Press Start 2P',monospace;font-size:8px">₱${b.amt}</td>
+      <td>${b.mode||'—'}</td>
+      <td><span style="font-family:'VT323',monospace;font-size:13px">${b.ref||'—'}</span><button class="ibtn" title="Copy" style="font-size:10px;padding:2px 5px;margin-left:4px" onclick="navigator.clipboard.writeText('${b.ref||''}');toast('📋 Copied!','ok')">⧉</button></td>
+      <td><span class="bdg ${b.stat==='Paid'?'av':b.stat==='Pending'?'pn':'bw'}">${b.stat}</span></td>
+      <td><div class="actrow"><button class="ibtn" onclick="openEditBilling(${b.id})">✍️</button><button class="ibtn" style="background:#fde" onclick="confirmDelete('billing',${b.id},'${b.book}')">🗑️</button></div></td>
+    </tr>`).join('')
+  :'<tr><td colspan="9"><div class="empty"><span>🪙</span>No billing records.</div></td></tr>';
+  const rev=BILLING.filter(b=>b.stat==='Paid').reduce((s,b)=>s+b.amt,0);
+  const rp=document.getElementById('bil-rev-safe'); if(rp) rp.textContent='₱'+rev.toLocaleString();
+  const bp=document.getElementById('bil-pills');
+  if(bp) bp.innerHTML=`${pill(BILLING.filter(b=>b.stat==='Paid').length,'Paid','gd')}${pill(BILLING.filter(b=>b.stat==='Pending').length,'Pending','yd')}${pill(BILLING.filter(b=>b.stat==='Expired').length,'Expired','rd')}${pill(BILLING.length,'Total')}`;
+}
+let bilFilter='All';
+function setBilFilter(f,btn){
+  bilFilter=f;
+  document.querySelectorAll('.bil-ftab').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  renderBilling();
+}
+
+/* ══ BILLING CRUD ══ */
+async function saveBilling(){
+  if(!v('bi-mem')||!v('bi-book')){ toast('Member & Book required!','er'); return; }
+  const res=await api('billing.php','POST',{
+    member_name:v('bi-mem'), member_email:v('bi-email')||'',
+    book_title:v('bi-book'),
+    billing_date:v('bi-date')||new Date().toISOString().split('T')[0],
+    amount:parseFloat(document.getElementById('bi-amt').value)||0,
+    mode_of_payment:document.getElementById('bi-mode').value,
+    reference_number:v('bi-ref'),
+    status_of_payment:document.getElementById('bi-stat').value,
+  });
+  if(res.success){ await loadAll(); closeM('modal-billing'); renderBilling(); renderAdminStats(); toast('🪙 Billing record saved!','ok'); }
+  else { toast(res.error||'Save failed!','er'); }
+}
+function openEditBilling(id){
+  const b=BILLING.find(x=>x.id===id); if(!b) return;
+  document.getElementById('ebil-id').value=b.id;
+  document.getElementById('ebil-date').value=b.date;
+  document.getElementById('ebil-mem').value=b.mem;
+  document.getElementById('ebil-book').value=b.book;
+  document.getElementById('ebil-amt').value=b.amt;
+  document.getElementById('ebil-mode').value=b.mode;
+  document.getElementById('ebil-ref').value=b.ref||'';
+  document.getElementById('ebil-stat').value=b.stat;
+  openM('modal-edit-billing');
+}
+async function saveEditBilling(){
+  const id=parseInt(document.getElementById('ebil-id').value);
+  const res=await api('billing.php','PUT',{
+    id, billing_date:document.getElementById('ebil-date').value,
+    member_name:document.getElementById('ebil-mem').value.trim(),
+    book_title:document.getElementById('ebil-book').value.trim(),
+    amount:parseFloat(document.getElementById('ebil-amt').value)||0,
+    mode_of_payment:document.getElementById('ebil-mode').value,
+    reference_number:document.getElementById('ebil-ref').value.trim(),
+    status_of_payment:document.getElementById('ebil-stat').value,
+  });
+  if(res.success){ await loadAll(); closeM('modal-edit-billing'); renderBilling(); renderAdminStats(); toast('🪙 Billing updated!','ok'); }
+  else { toast(res.error||'Update failed!','er'); }
+}
+
+/* ══ MEMBERS ══ */
+function renderMembers(){
+  const el=document.getElementById('mbody'); if(!el) return;
+  el.innerHTML=MEMBERS.length?MEMBERS.map(m=>{
+    const cnt=m.borrow_count||BORROW_RECORDS.filter(r=>r.email===m.email).length;
+    return `<tr>
+      <td>${m.id}</td>
+      <td><div class="tdm">${m.name}</div><div class="tds">${m.email}</div></td>
+      <td>${m.contact||'—'}</td>
+      <td style="font-family:'Press Start 2P',monospace;font-size:8px">${cnt}</td>
+      <td><div class="actrow">
+        <button class="ibtn" onclick="openMemberHistory(${m.id})">📋</button>
+        <button class="ibtn" onclick="openEditMember(${m.id})">✍️</button>
+        <button class="ibtn" style="background:#fde" onclick="confirmDelete('member',${m.id},'${m.name}')">🗑️</button>
+      </div></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="5"><div class="empty"><span>🌻</span>No members.</div></td></tr>';
+}
+function openMemberHistory(id){
+  const m=MEMBERS.find(x=>x.id===id); if(!m) return;
+  const hist=BORROW_RECORDS.filter(r=>r.email===m.email);
+  document.getElementById('mh-name').textContent=m.name;
+  document.getElementById('mh-list').innerHTML=hist.length?hist.map(r=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--cream2)">
+      <div><div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--soil3)">${r.book}</div>
+        <div style="font-family:'VT323',monospace;font-size:14px;color:var(--wood)">${r.borrowed} → ${r.due}</div></div>
+      <span class="bdg ${r.stat==='Active'?'av':r.stat==='Overdue'?'bw':'pd'}">${r.stat}</span>
+    </div>`).join(''):'<div style="font-family:\'VT323\',monospace;font-size:18px;color:var(--wood);text-align:center;padding:16px">No borrow history yet.</div>';
+  document.getElementById('mem-history').classList.add('show');
+}
+async function saveMember(){
+  if(!v('m-name')){ toast('Name required!','er'); return; }
+  toast('🌻 Use registration to add members.','er');
+}
+function openEditMember(id){
+  const m=MEMBERS.find(x=>x.id===id); if(!m) return;
+  document.getElementById('em-id').value=m.id;
+  document.getElementById('em-name').value=m.name;
+  document.getElementById('em-email').value=m.email;
+  document.getElementById('em-contact').value=m.contact||'';
+  openM('modal-edit-member');
+}
+async function saveEditMember(){
+  const id=parseInt(document.getElementById('em-id').value);
+  if(!document.getElementById('em-name').value.trim()){ toast('Name required!','er'); return; }
+  const res=await api('members.php','PUT',{
+    id, fullname:document.getElementById('em-name').value.trim(),
+    email:document.getElementById('em-email').value.trim(),
+    contact:document.getElementById('em-contact').value.trim(),
+  });
+  if(res.success){ await loadAll(); closeM('modal-edit-member'); renderMembers(); toast('🌻 Member updated!','ok'); }
+  else { toast(res.error||'Update failed!','er'); }
+}
+
+/* ══ ADMINS ══ */
+function renderAdmins(){
+  const el=document.getElementById('abody'); if(!el) return;
+  el.innerHTML=ADMINS.length?ADMINS.map(a=>`
+    <tr><td>${a.id}</td>
+      <td><div class="tdm">${a.user}</div></td>
+      <td><span class="bdg ${a.stat==='Active'?'av':'bw'}">${a.stat}</span></td>
+      <td>${a.created||'—'}</td>
+      <td>${a.by||'—'}</td>
+      <td><div class="actrow"><button class="ibtn" onclick="openEditAdmin(${a.id})">✍️</button><button class="ibtn" style="background:#fde" onclick="confirmDelete('admin',${a.id},'${a.user}')">🗑️</button></div></td>
+    </tr>`).join(''):'<tr><td colspan="6"><div class="empty"><span>🗝️</span>No admins.</div></td></tr>';
+}
+async function saveAdmin(){
+  if(!v('ad-user')){ toast('Username required!','er'); return; }
+  if(!v('ad-pass')){ toast('Password required!','er'); return; }
+  const res=await api('admins.php','POST',{
+    username:v('ad-user'), password:v('ad-pass'),
+    is_active:document.getElementById('ad-stat').value==='Active'?1:0,
+    created_by:v('ad-by')||'admin',
+  });
+  if(res.success){ await loadAll(); closeM('modal-admin'); renderAdmins(); toast('🍄 Admin created!','ok'); }
+  else { toast(res.error||'Create failed!','er'); }
+}
+function openEditAdmin(id){
+  const a=ADMINS.find(x=>x.id===id); if(!a) return;
+  document.getElementById('ead-id').value=a.id;
+  document.getElementById('ead-user').value=a.user;
+  document.getElementById('ead-pass').value='';
+  document.getElementById('ead-stat').value=a.stat;
+  document.getElementById('ead-by').value='';
+  openM('modal-edit-admin');
+}
+async function saveEditAdmin(){
+  const id=parseInt(document.getElementById('ead-id').value);
+  if(!document.getElementById('ead-user').value.trim()){ toast('Username required!','er'); return; }
+  const payload={
+    id, username:document.getElementById('ead-user').value.trim(),
+    is_active:document.getElementById('ead-stat').value==='Active'?1:0,
+  };
+  const np=document.getElementById('ead-pass').value;
+  if(np) payload.password=np;
+  const res=await api('admins.php','PUT',payload);
+  if(res.success){ await loadAll(); closeM('modal-edit-admin'); renderAdmins(); toast('🍄 Admin updated!','ok'); }
+  else { toast(res.error||'Update failed!','er'); }
+}
+
+/* ══ DELETE ══ */
+async function doDelete(type,id){
+  let res;
+  if(type==='member') res=await api('members.php','DELETE',{id});
+  else if(type==='billing') res=await api('billing.php','DELETE',{id});
+  else if(type==='admin') res=await api('admins.php','DELETE',{id});
+  if(res?.success){
+    await loadAll(); renderAll(); renderAdminStats();
+    toast('🗑️ Deleted.','ok');
+  } else { toast(res?.error||'Delete failed!','er'); }
+}
+
+/* ══ BOOKWORM DASHBOARD ══ */
+function renderBwDash(){
+  if(currentRole!=='user') return;
+  const myBorrows=getCurrentUserBorrows();
+  const active=myBorrows.filter(r=>r.stat==='Active').length;
+  const overdue=myBorrows.filter(r=>r.stat==='Overdue').length;
+  const returned=myBorrows.filter(r=>r.stat==='Returned').length;
+  const myPaid=getCurrentUserPaidBilling();
+  const dash=document.getElementById('bw-dashboard');
+  if(dash&&(currentUserId||currentUserEmail)){
+    dash.style.display='block';
+    document.getElementById('bw-active').textContent=active;
+    document.getElementById('bw-overdue').textContent=overdue;
+    document.getElementById('bw-returned').textContent=returned;
+    document.getElementById('bw-paid').textContent=myPaid.length;
+  }
+
+  // ── Active borrows section ──
+  const borrowEl=document.getElementById('bw-borrow-list');
+  if(borrowEl){
+    const activeBorrows=myBorrows.filter(r=>r.stat!=='Returned');
+    const today=new Date().toISOString().split('T')[0];
+    if(activeBorrows.length){
+      borrowEl.style.display='block';
+      document.getElementById('bw-borrows-inner').innerHTML=activeBorrows.map(r=>{
+        const isOd=r.stat==='Overdue';
+        const daysLeft=r.stat==='Active'?Math.ceil((new Date(r.due)-new Date(today))/(1000*60*60*24)):null;
+        const fine=isOd?Math.floor((new Date(today)-new Date(r.due))/(1000*60*60*24))*5:0;
+        return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${isOd?'linear-gradient(135deg,rgba(192,57,43,.12),rgba(192,57,43,.06))':'linear-gradient(135deg,rgba(90,173,42,.1),rgba(90,173,42,.04))'};border:2px solid ${isOd?'var(--red)':'var(--grass)'};margin-bottom:6px">
+          <span style="font-size:22px;flex-shrink:0">${isOd?'⚠️':'🍀'}</span>
+          <div style="flex:1;min-width:0">
+            <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--soil3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.book}</div>
+            <div style="font-family:'VT323',monospace;font-size:14px;color:var(--wood);margin-top:2px">Borrowed: ${r.borrowed}</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap">
+              <span style="font-family:'VT323',monospace;font-size:14px;color:${isOd?'var(--red)':daysLeft!==null&&daysLeft<=3?'var(--orange)':'var(--soil2)'}">Due: <strong>${r.due}</strong></span>
+              ${daysLeft!==null?`<span style="font-family:'VT323',monospace;font-size:13px;color:${daysLeft<=3?'var(--red)':'var(--grass)'}">(${daysLeft}d left)</span>`:''}
+              ${isOd?`<span style="font-family:'Press Start 2P',monospace;font-size:5px;color:var(--red)">₱${fine} fine</span>`:''}
+            </div>
+          </div>
+          <span class="bdg ${isOd?'od':'ac'}" style="font-size:5px;padding:3px 7px;flex-shrink:0">${r.stat}</span>
+          ${isOd?`<button class="pbtn r" style="font-size:5px;padding:5px 10px;margin-top:4px;width:100%"
+            onclick="openFinePayment(${r.id},'${r.book.replace(/'/g,'&apos;')}',${fine})">
+            💸 PAY FINE — ₱${fine}
+          </button>`:''}
+        </div>`;
+      }).join('');
+    } else { borrowEl.style.display='none'; }
+  }
+
+  // ── eBook shelf ──
+  const inner=document.getElementById('bw-ebooks-inner');
+  const el=document.getElementById('bw-ebook-list');
+  if(!inner||!el) return;
+  if(myPaid.length){
+    el.style.display='block';
+    // Deduplicate by book title (keep latest payment)
+    const seen=new Set();
+    const uniquePaid=myPaid.filter(b=>{ if(seen.has(b.book)) return false; seen.add(b.book); return true; });
+    const colors=[
+      ['#2e8b7a','#1e6b5a'],['#7a4a26','#5c3318'],['#3498db','#2177b0'],
+      ['#c0392b','#922b21'],['#1e4010','#2d5e1e'],['#8e44ad','#6c3483']
+    ];
+    const cards = uniquePaid.map((b,idx)=>{
+      const bookData = BOOKS.find(bk=>bk.id===b.bookId) || BOOKS.find(bk=>bk.title===b.book);
+      const bookUrl  = bookData?.url || b.book_url || '';
+      const author   = bookData?.author || '';
+      const price    = bookData?.price || b.amt || 0;
+      const [c1,c2]  = colors[idx % colors.length];
+      // Store data on a div, use event delegation - no inline strings needed
+      const cardId   = 'ebcard-'+idx;
+      return { cardId, bookUrl, bookTitle: b.book, ref: b.ref||'', html:`
+        <div id="${cardId}" class="bw-lib-card" data-title="${b.book.replace(/"/g,'&quot;')}" data-author="${(bookData?.author||'').replace(/"/g,'&quot;')}" data-date="${b.date||''}"
+          style="border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);overflow:hidden;display:flex;flex-direction:column;background:var(--cream)">
+          <div style="position:relative;min-height:120px;background:linear-gradient(160deg,${c1},${c2});overflow:hidden">
+            ${bookData?.cover
+              ?`<img src="${bookData.cover}" alt="cover" style="width:100%;height:130px;object-fit:cover;display:block">
+                <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.7));padding:8px 8px 6px">
+                  <div style="font-family:'Press Start 2P',monospace;font-size:5px;color:white;line-height:1.6">${b.book}</div>
+                  ${author?`<div style="font-family:'VT323',monospace;font-size:13px;color:rgba(255,255,255,.8)">${author}</div>`:''}
+                </div>`
+              :`<div style="padding:20px 12px 16px;text-align:center">
+                  <div style="font-size:28px;margin-bottom:6px">🌙</div>
+                  <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:white;line-height:1.7;word-break:break-word">${b.book}</div>
+                  ${author?`<div style="font-family:'VT323',monospace;font-size:13px;color:rgba(255,255,255,.75);margin-top:4px">${author}</div>`:''}
+                </div>`}
+            <div style="position:absolute;top:6px;right:6px;font-family:'Press Start 2P',monospace;font-size:4px;background:var(--grass);color:white;padding:3px 6px;border:1px solid rgba(0,0,0,.3)">✓ OWNED</div>
+          </div>
+          <div style="padding:10px 12px;flex:1;border-top:2px solid var(--soil3)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <span style="font-family:'VT323',monospace;font-size:14px;color:var(--wood2)">Purchased:</span>
+              <strong style="font-family:'VT323',monospace;font-size:14px;color:var(--soil3)">${b.date}</strong>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+              <span style="font-family:'VT323',monospace;font-size:13px;color:var(--wood2)">Ref #:</span>
+              <span style="font-family:'VT323',monospace;font-size:13px;color:var(--teal2)">${b.ref||'—'}</span>
+            </div>
+            <div style="display:flex;justify-content:space-between;align-items:center">
+              <span style="font-family:'VT323',monospace;font-size:13px;color:var(--wood2)">Paid:</span>
+              <strong style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--teal2)">₱${price}</strong>
+            </div>
+          </div>
+          <div style="padding:10px 12px;border-top:2px solid var(--soil3);display:flex;flex-direction:column;gap:6px;background:var(--cream2)">
+            ${bookUrl ? `
+            <button class="pbtn gold bw-read-btn" data-idx="${idx}"
+              style="width:100%;font-size:6px;padding:8px;text-align:center">
+              📖 READ eBOOK
+            </button>
+            <button class="pbtn t bw-dl-btn" data-idx="${idx}"
+              style="width:100%;font-size:6px;padding:8px;text-align:center">
+              📥 DOWNLOAD
+            </button>` : `
+            <div style="font-family:'VT323',monospace;font-size:15px;color:var(--wood2);text-align:center;padding:6px">
+              📎 File not linked yet
+            </div>`}
+          </div>
+        </div>`};
+    });
+    // Store card data globally for event delegation
+    window._ebCards = cards;
+    inner.innerHTML = `<div id="bw-lib-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:14px;padding:4px 0">`
+      + cards.map(c=>c.html).join('') + `</div>`;
+  } else {
+    el.style.display='none';
+  }
+}
+
+/* ══ ACCOUNT PANEL ══ */
+let accountPanelOpen=false;
+function toggleAccountPanel(){
+  accountPanelOpen=!accountPanelOpen;
+  const p=document.getElementById('account-panel');
+  p.style.display=accountPanelOpen?'block':'none';
+  if(accountPanelOpen) updateAccountPanel();
+}
+document.addEventListener('click',e=>{
+  // eBook READ button
+  const readBtn = e.target.closest('.bw-read-btn');
+  if(readBtn){
+    const card = window._ebCards?.[readBtn.dataset.idx];
+    if(card) openEbookReader(card.bookUrl, card.bookTitle, card.ref);
+    return;
+  }
+  // eBook DOWNLOAD button
+  const dlBtn = e.target.closest('.bw-dl-btn');
+  if(dlBtn){
+    const card = window._ebCards?.[dlBtn.dataset.idx];
+    if(card && card.bookUrl){
+      const a = document.createElement('a');
+      a.href = card.bookUrl.startsWith('http') ? card.bookUrl
+        : window.location.origin + '/' + window.location.pathname.split('/').slice(1,-1).join('/') + '/' + card.bookUrl;
+      a.download = card.bookTitle + '.epub';
+      a.target = '_blank';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+    return;
+  }
+  const panel=document.getElementById('account-panel');
+  const chip=document.getElementById('user-chip');
+  if(panel&&chip&&!panel.contains(e.target)&&!chip.contains(e.target)){ accountPanelOpen=false; panel.style.display='none'; }
+});
+function updateAccountPanel(){
+  document.getElementById('ap-name').textContent=currentUserName||'—';
+  document.getElementById('ap-email').textContent=currentUserEmail||'—';
+  document.getElementById('ap-contact').textContent=currentUserContact||'—';
+  const myBorrows=getCurrentUserBorrows();
+  document.getElementById('ap-active').textContent=myBorrows.filter(r=>r.stat==='Active').length;
+  document.getElementById('ap-overdue').textContent=myBorrows.filter(r=>r.stat==='Overdue').length;
+  document.getElementById('ap-returned').textContent=myBorrows.filter(r=>r.stat==='Returned').length;
+  document.getElementById('ap-paid').textContent=getCurrentUserPaidBilling().length;
+}
+
+/* ══ TABS ══ */
+function swTab(id,btn){
+  document.querySelectorAll('.tpanel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tbtn').forEach(b=>b.classList.remove('on'));
+  document.getElementById(id).classList.add('on'); btn.classList.add('on');
+}
+function swAdmin(id,btn){
+  document.querySelectorAll('.apanel').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.atab').forEach(b=>b.classList.remove('on'));
+  document.getElementById(id).classList.add('on'); btn.classList.add('on');
+}
+function filtTbl(inp,tid){
+  const val=inp.value.toLowerCase();
+  document.querySelectorAll('#'+tid+' tbody tr').forEach(tr=>{
+    tr.style.display=tr.textContent.toLowerCase().includes(val)?'':'none';
+  });
+}
+
+/* ══ MODALS ══ */
+function openM(id){ document.getElementById(id).classList.add('open'); }
+function closeM(id){ document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.mbg').forEach(m=>m.addEventListener('click',e=>{ if(e.target===m) m.classList.remove('open'); }));
+
+/* ══ TOAST ══ */
+function toast(msg,type='ok'){
+  const w=document.getElementById('toasts');
+  const t=document.createElement('div');
+  t.className='toast '+type;
+  t.innerHTML=(type==='ok'?'🌸':type==='er'?'💔':'🫧')+' '+msg;
+  w.appendChild(t); setTimeout(()=>t.remove(),3200);
+}
+
+/* ══ RENDER ALL ══ */
+function renderAll(){
+  renderRecent(libPage||1); renderInventory(); renderBorrowed(); renderBilling();
+  renderMembers(); renderAdmins(); renderCatBars(); renderAdminStats();
+  initCounts(); renderBwDash(); renderHomeExtras();
+}
+
+/* ══ EXPORT CSV ══ */
+function exportBorrows(){
+  const headers=['ID','Bookworm Name','Email','Contact','Book','Date Borrowed','Due Date','Status'];
+  const rows=BORROW_RECORDS.map(r=>[r.id,'"'+r.name+'"',r.email,r.contact||'','"'+r.book+'"',r.borrowed,r.due,r.stat]);
+  const csv=[headers,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='aizechive_borrows.csv'; a.click(); toast('📥 Exported borrows CSV!','ok');
+}
+function exportCSV(){
+  const headers=['ID','Title','Author','Category','Type','Barcode','Price','Total Stocks','Available','Status'];
+  const rows=BOOKS.map(b=>[b.id,'"'+b.title+'"','"'+b.author+'"',b.cat,b.type,b.bc,b.price,b.stocks||'N/A',(b.available_copies??'?'),b.stat]);
+  const csv=[headers,...rows].map(r=>r.join(',')).join('\n');
+  const a=document.createElement('a'); a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='aizechive_inventory.csv'; a.click(); toast('📥 Exported inventory CSV!','ok');
+}
+
+/* ══ PILL ══ */
+function pill(n,lbl,cls=''){
+  return `<div class="pill ${cls}"><span class="pill-n">${n}</span>${lbl}</div>`;
+}
+
+/* ══ CLOCK ══ */
+function tick(){
+  const n=new Date(), p=x=>String(x).padStart(2,'0');
+  const el=document.getElementById('clk');
+  if(el) el.textContent='🕰️ '+p(n.getHours())+':'+p(n.getMinutes())+':'+p(n.getSeconds());
+}
+setInterval(tick,1000); tick();
+
+/* ══ HELPERS ══ */
+function v(id){ return document.getElementById(id).value.trim(); }
+function set(id,val){ document.getElementById(id).value=val; }
+
+/* ══ SESSION TIMEOUT ══ */
+const SESSION_MS=15*60*1000;
+let sessionStart=Date.now(), sessionWarned=false;
+function resetSession(){ sessionStart=Date.now(); sessionWarned=false; document.getElementById('session-warn').classList.remove('show'); }
+document.addEventListener('click',resetSession);
+document.addEventListener('keydown',resetSession);
+setInterval(()=>{
+  if(!currentRole) return;
+  const elapsed=Date.now()-sessionStart;
+  const pct=elapsed/SESSION_MS;
+  const bar=document.getElementById('session-bar');
+  bar.style.width=(100-pct*100)+'%';
+  if(pct>0.8){ bar.className='warn'; if(!sessionWarned){ sessionWarned=true; document.getElementById('session-warn').classList.add('show'); } }
+  if(pct>0.9) bar.className='danger';
+  if(elapsed>=SESSION_MS){ toast('⏰ Session expired. Logging out...','er'); setTimeout(logout,1500); }
+},1000);
+
+/* ══ CONFIRM DIALOG ══ */
+let _confirmCb=null;
+function confirmAction(icon,title,msg,okLabel,cb){
+  document.getElementById('confirm-icon').textContent=icon;
+  document.getElementById('confirm-title').textContent=title;
+  document.getElementById('confirm-msg').textContent=msg;
+  document.getElementById('confirm-ok-btn').textContent=okLabel;
+  _confirmCb=cb; openM('modal-confirm');
+}
+function confirmOk(){ closeM('modal-confirm'); if(_confirmCb)_confirmCb(); _confirmCb=null; }
+function confirmCancel(){ closeM('modal-confirm'); _confirmCb=null; }
+function confirmDelete(type,id,label){
+  confirmAction('🗑️','Delete '+type,'Delete "'+label+'"? This cannot be undone.','🗑️ Delete',()=>doDelete(type,id));
+}
+
+/* ══ EBOOK READER (epub.js) ══ */
+let _currentEbookUrl = '';
+let _epubBook = null;
+let _epubRendition = null;
+
+function openEbookReader(url, title, ref) {
+  _currentEbookUrl = url;
+  document.getElementById('er-title').textContent = '📖 ' + title;
+  document.getElementById('er-ref').textContent = 'Ref: ' + (ref || '—');
+  document.getElementById('er-url-display').textContent = url;
+  document.getElementById('er-loading').style.display = 'flex';
+  document.getElementById('er-loading-sub').textContent = 'Loading ' + title + '...';
+  document.getElementById('er-epub-wrap').style.display = 'none';
+  document.getElementById('er-fallback').style.display = 'none';
+  openM('modal-ebook-reader');
+
+  const isEpub = /\.epub$/i.test(url);
+  if (isEpub) {
+    loadEpub(url);
+  } else {
+    // For non-epub, show download card
+    setTimeout(showEbookFallback, 600);
+  }
+}
+
+function loadEpub(url) {
+  // Destroy previous book
+  if (_epubBook) { try { _epubBook.destroy(); } catch(e){} }
+  _epubBook = null; _epubRendition = null;
+
+  // Load epub.js dynamically if not already loaded
+  if (typeof ePub === 'undefined') {
+    const script = document.createElement('script');
+    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/epub.js/0.3.88/epub.min.js';
+    script.onload = () => renderEpub(url);
+    script.onerror = () => showEbookFallback();
+    document.head.appendChild(script);
+  } else {
+    renderEpub(url);
+  }
+}
+
+function renderEpub(url) {
+  try {
+    // Build absolute URL for local files
+    let absUrl = url;
+    if (!url.startsWith('http')) {
+      const base = window.location.href.replace(/\/[^\/]*$/, '/');
+      absUrl = base + url;
+    }
+    _epubBook = ePub(absUrl);
+    const viewer = document.getElementById('er-viewer');
+    viewer.innerHTML = '';
+    _epubRendition = _epubBook.renderTo(viewer, {
+      width: '100%',
+      height: '100%',
+      spread: 'none',
+      flow: 'paginated'
+    });
+    _epubRendition.display().then(() => {
+      document.getElementById('er-loading').style.display = 'none';
+      document.getElementById('er-epub-wrap').style.display = 'flex';
+      updateEpubProgress();
+    }).catch(() => showEbookFallback());
+
+    _epubRendition.on('relocated', updateEpubProgress);
+    _epubBook.ready.catch(() => showEbookFallback());
+
+    // Keyboard nav
+    _epubRendition.on('keydown', e => {
+      if(e.key==='ArrowRight') epubNext();
+      if(e.key==='ArrowLeft') epubPrev();
+    });
+  } catch(e) {
+    console.error('epub error', e);
+    showEbookFallback();
+  }
+}
+
+function updateEpubProgress() {
+  if (!_epubRendition) return;
+  try {
+    const loc = _epubRendition.currentLocation();
+    if (loc && loc.start) {
+      const pct = Math.round((loc.start.percentage || 0) * 100);
+      document.getElementById('er-progress').textContent = pct + '% complete';
+      // Try to get chapter title
+      _epubBook.spine.get(loc.start.cfi)?.load(_epubBook.load.bind(_epubBook))
+        .then(c => { if(c?.title) document.getElementById('er-chapter').textContent = c.title; })
+        .catch(()=>{});
+    }
+  } catch(e){}
+}
+
+function epubNext() {
+  if (_epubRendition) _epubRendition.next().then(updateEpubProgress).catch(()=>{});
+}
+function epubPrev() {
+  if (_epubRendition) _epubRendition.prev().then(updateEpubProgress).catch(()=>{});
+}
+function showEbookFallback() {
+  document.getElementById('er-loading').style.display = 'none';
+  document.getElementById('er-epub-wrap').style.display = 'none';
+  document.getElementById('er-fallback').style.display = 'block';
+}
+function openEbookExternal() {
+  if (_currentEbookUrl) {
+    const url = _currentEbookUrl.startsWith('http') ? _currentEbookUrl
+      : window.location.origin + '/' + (window.location.pathname.split('/').slice(1,-1).join('/') + '/' + _currentEbookUrl).replace(/\/+/g,'/');
+    window.open(url, '_blank');
+  }
+}
+function closeEbookReader() {
+  if (_epubRendition) { try { _epubRendition.destroy(); } catch(e){} _epubRendition = null; }
+  if (_epubBook) { try { _epubBook.destroy(); } catch(e){} _epubBook = null; }
+  document.getElementById('er-viewer').innerHTML = '';
+  closeM('modal-ebook-reader');
+}
+
+
+/* ══ FINE PAYMENT ══ */
+let _fineRecordId = 0;
+function openFinePayment(recordId, bookTitle, fine) {
+  _fineRecordId = recordId;
+  document.getElementById('fp-record-id').value = recordId;
+  document.getElementById('fp-book').textContent = bookTitle;
+  document.getElementById('fp-amount').textContent = '₱' + fine;
+  document.getElementById('fp-ref').value = '';
+  document.getElementById('fp-mode').value = 'GCash';
+  openM('modal-fine');
+}
+async function submitFinePay() {
+  const ref  = document.getElementById('fp-ref').value.trim();
+  const mode = document.getElementById('fp-mode').value;
+  const id   = _fineRecordId;
+  if (!ref) { toast('Please enter a reference / transaction number!', 'er'); return; }
+  const rec = BORROW_RECORDS.find(r => r.id === id);
+  if (!rec) { toast('Record not found.', 'er'); return; }
+  const today = new Date().toISOString().split('T')[0];
+  const days  = Math.floor((new Date(today) - new Date(rec.due)) / (1000*60*60*24));
+  const fine  = days * 5;
+  const res = await api('billing.php', 'POST', {
+    user_id: currentUserId||null, book_id: rec.bookId||null,
+    member_name: currentUserName||rec.name, member_email: currentUserEmail||rec.email,
+    book_title: '⚠️ Fine: ' + rec.book, billing_date: today,
+    amount: fine, mode_of_payment: mode, reference_number: ref,
+  });
+  if (res.success) {
+    closeM('modal-fine'); await loadAll();
+    renderBwDash(); renderBilling(); renderAdminStats();
+    toast('✅ Fine payment submitted! Ref: ' + ref, 'ok');
+  } else { toast(res.error || 'Failed to submit fine payment.', 'er'); }
+}
+
+/* ══ BW LIBRARY SEARCH & FILTER ══ */
+function filterBwLibrary() {
+  const q    = (document.getElementById('lib-bw-search')?.value || '').toLowerCase();
+  const sort = document.getElementById('lib-bw-sort')?.value || 'date-desc';
+  const cards = document.querySelectorAll('.bw-lib-card');
+  let visible = 0;
+  cards.forEach(card => {
+    const match = !q || (card.dataset.title||'').toLowerCase().includes(q) || (card.dataset.author||'').toLowerCase().includes(q);
+    card.style.display = match ? '' : 'none';
+    if (match) visible++;
+  });
+  const grid = document.getElementById('bw-lib-grid');
+  if (grid) {
+    const arr = [...grid.children].filter(c => c.style.display !== 'none');
+    arr.sort((a, b) => {
+      if (sort === 'title-asc')  return (a.dataset.title||'').localeCompare(b.dataset.title||'');
+      if (sort === 'title-desc') return (b.dataset.title||'').localeCompare(a.dataset.title||'');
+      if (sort === 'date-asc')   return (a.dataset.date||'').localeCompare(b.dataset.date||'');
+      return (b.dataset.date||'').localeCompare(a.dataset.date||'');
+    });
+    arr.forEach(c => grid.appendChild(c));
+  }
+  const empty = document.getElementById('bw-lib-empty');
+  if (empty) empty.style.display = visible === 0 ? 'block' : 'none';
+}
+
+/* ══ COVER IMAGE PREVIEW ══ */
+function previewCover(input) {
+  const file = input.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('b-cover-img').src = e.target.result;
+    document.getElementById('b-cover-preview').style.display = 'block';
+    document.getElementById('b-cover-url').value = '';
+  };
+  reader.readAsDataURL(file);
+}
+</script>
+
+<!-- EBOOK READER MODAL -->
+<div class="mbg" id="modal-ebook-reader">
+<div class="mbox" style="width:min(96vw,960px);max-height:96vh;display:flex;flex-direction:column">
+  <div class="mhead" style="background:var(--teal2);flex-shrink:0">
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <span id="er-title" style="font-size:8px">📖 Reading: —</span>
+      <span style="font-family:'VT323',monospace;font-size:13px;color:rgba(255,255,255,.6)" id="er-ref">Ref: —</span>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center">
+      <button class="pbtn bl" style="font-size:6px;padding:6px 10px" onclick="openEbookExternal()">🔗 Download</button>
+      <button class="ibtn" style="background:var(--red);color:white" onclick="closeEbookReader()">✕</button>
+    </div>
+  </div>
+  <!-- Loading -->
+  <div id="er-loading" style="display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:14px;background:var(--cream)">
+    <span style="font-size:40px;animation:spin 1s steps(4) infinite">📖</span>
+    <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--soil3)">Loading eBook...</div>
+    <div style="font-family:'VT323',monospace;font-size:15px;color:var(--wood)" id="er-loading-sub">Please wait...</div>
+  </div>
+  <!-- EPUB Viewer -->
+  <div id="er-epub-wrap" style="display:none;flex:1;flex-direction:column;min-height:0">
+    <div id="er-viewer" style="width:100%;height:72vh;background:#fdf6e3;overflow:hidden;position:relative"></div>
+    <!-- Nav controls -->
+    <div style="background:var(--gp2);border-top:3px solid var(--soil3);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-shrink:0">
+      <button class="pbtn b" style="font-size:7px;padding:8px 16px" onclick="epubPrev()">◀ Prev</button>
+      <div style="font-family:'VT323',monospace;font-size:16px;color:var(--cream2);text-align:center">
+        <div id="er-chapter" style="font-size:13px">—</div>
+        <div id="er-progress" style="font-size:13px;color:rgba(255,255,255,.5)">Page — of —</div>
+      </div>
+      <button class="pbtn b" style="font-size:7px;padding:8px 16px" onclick="epubNext()">Next ▶</button>
+    </div>
+  </div>
+  <!-- Fallback download card -->
+  <div id="er-fallback" style="display:none;padding:36px 24px;text-align:center;background:var(--cream)">
+    <div style="font-size:52px;margin-bottom:14px">📚</div>
+    <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--soil3);margin-bottom:10px">eBook Ready!</div>
+    <div style="font-family:'VT323',monospace;font-size:17px;color:var(--wood);margin-bottom:22px;line-height:1.6">
+      Your eBook is available. Click below to<br>download and open it with your eBook reader.
+    </div>
+    <button class="pbtn t" style="font-size:8px;padding:13px 22px;margin-bottom:12px" onclick="openEbookExternal()">
+      📥 Download eBook
+    </button>
+    <div style="font-family:'VT323',monospace;font-size:14px;color:var(--wood2);margin-top:8px" id="er-url-display"></div>
+    <div style="margin-top:16px;font-family:'VT323',monospace;font-size:14px;color:var(--wood2);background:var(--cream2);border:2px solid var(--soil3);padding:10px 14px;line-height:1.6">
+      💡 To read .epub files, use:<br>
+      <strong>Calibre</strong> (PC) · <strong>Moon+ Reader</strong> (Android) · <strong>Books</strong> (iPhone)
+    </div>
+  </div>
+  <div style="background:var(--gp);padding:7px 16px;border-top:3px solid var(--soil3);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+    <div style="font-family:'VT323',monospace;font-size:14px;color:rgba(255,255,255,.6)">🔒 Access verified · ✓ Paid</div>
+    <button class="pbtn r" style="font-size:6px;padding:6px 12px" onclick="closeEbookReader()">✕ Close</button>
+  </div>
+</div>
+</div>
+
+
+<!-- FINE PAYMENT MODAL -->
+<div class="mbg" id="modal-fine">
+<div class="mbox" style="width:min(96vw,420px)">
+  <div class="mhead" style="background:var(--red)">
+    <span style="font-size:8px">💸 Pay Overdue Fine</span>
+    <button class="ibtn" style="background:rgba(0,0,0,.3);color:white" onclick="closeM('modal-fine')">✕</button>
+  </div>
+  <div style="padding:20px;background:var(--cream);display:flex;flex-direction:column;gap:12px">
+    <div style="background:rgba(192,57,43,.08);border:2px solid var(--red);padding:12px;text-align:center">
+      <div style="font-family:'VT323',monospace;font-size:15px;color:var(--wood2);margin-bottom:4px" id="fp-book">—</div>
+      <div style="font-family:'Press Start 2P',monospace;font-size:14px;color:var(--red)" id="fp-amount">₱0</div>
+      <div style="font-family:'VT323',monospace;font-size:13px;color:var(--wood2);margin-top:4px">Total Fine Due</div>
+    </div>
+    <div><label class="flbl">Payment Method</label>
+      <select class="fsel" id="fp-mode" style="width:100%">
+        <option value="GCash">💚 GCash</option><option value="Maya">💜 Maya</option>
+        <option value="Cash">💵 Cash (In-person)</option><option value="BPI">🏦 BPI</option><option value="BDO">🏦 BDO</option>
+      </select>
+    </div>
+    <div class="frow"><label class="flbl">Reference / Transaction Number</label>
+      <input class="finp" id="fp-ref" placeholder="Enter ref # after payment..."/>
+    </div>
+    <div style="background:rgba(46,139,122,.08);border:2px solid var(--teal);padding:8px 12px;font-family:'VT323',monospace;font-size:14px;color:var(--soil3);line-height:1.6">
+      📌 After submitting, your fine will be recorded as <strong>Paid</strong>.
+    </div>
+    <input type="hidden" id="fp-record-id" value=""/>
+  </div>
+  <div class="mfoot">
+    <button class="pbtn b" onclick="closeM('modal-fine')">Cancel</button>
+    <button class="pbtn r" onclick="submitFinePay()">💸 Submit Fine Payment</button>
+  </div>
+</div>
+</div>
+</body>

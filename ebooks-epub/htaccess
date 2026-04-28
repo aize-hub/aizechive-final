@@ -1,0 +1,9 @@
+Options -Indexes
+AddType application/epub+zip .epub
+
+<FilesMatch "\.epub$">
+    Order Allow,Deny
+    Allow from all
+    Header set Content-Disposition "attachment"
+    Header set Access-Control-Allow-Origin "*"
+</FilesMatch>
