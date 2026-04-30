@@ -382,6 +382,41 @@ tr.row-overdue:hover{background:rgba(192,57,43,.18)!important}
 .bw-card-lbl{font-family:'VT323',monospace;font-size:15px;color:var(--wood)}
 .bw-card.red .bw-card-num{color:var(--red)}
 .bw-card.teal .bw-card-num{color:var(--teal)}
+.account-actions{border-top:2px solid var(--cream2);padding-top:8px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.account-actions .pbtn{width:100%;min-width:0;padding-inline:8px}
+.bw-borrows-stack{display:flex;flex-direction:column;gap:8px}
+.bw-borrow-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:12px;background:var(--cream);border:2px solid var(--grass)}
+.bw-borrow-card.overdue{background:linear-gradient(135deg,rgba(192,57,43,.12),rgba(192,57,43,.05));border-color:var(--red)}
+.bw-borrow-icon{font-size:22px;line-height:1;align-self:start}
+.bw-borrow-main{min-width:0;display:flex;flex-direction:column;gap:4px}
+.bw-borrow-title{font-family:'Press Start 2P',monospace;font-size:6px;color:var(--soil3);line-height:1.7;word-break:break-word}
+.bw-borrow-meta{font-family:'VT323',monospace;font-size:14px;color:var(--wood)}
+.bw-borrow-due{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bw-borrow-side{display:flex;flex-direction:column;align-items:flex-end;gap:8px;min-width:120px}
+.bw-fine-note{font-family:'Press Start 2P',monospace;font-size:5px;color:var(--red);line-height:1.6;text-align:right}
+.bw-borrow-side .pbtn{width:100%;text-align:center}
+.receipt-box{background:linear-gradient(180deg,var(--cream),#fff9ec);border:3px dashed var(--soil3);padding:16px;display:flex;flex-direction:column;gap:12px}
+.receipt-head{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap;border-bottom:2px solid var(--cream3);padding-bottom:10px}
+.receipt-title{font-size:8px;color:var(--soil3);line-height:1.6}
+.receipt-sub{font-family:'VT323',monospace;font-size:15px;color:var(--wood)}
+.receipt-ref{font-family:'Press Start 2P',monospace;font-size:6px;background:var(--hay);color:var(--soil3);border:2px solid var(--soil3);box-shadow:2px 2px 0 var(--soil3);padding:8px 10px;line-height:1.8}
+.receipt-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.receipt-item{background:rgba(240,208,112,.12);border:2px solid var(--cream3);padding:10px}
+.receipt-label{font-size:5px;color:var(--wood2);margin-bottom:6px;letter-spacing:.8px;text-transform:uppercase}
+.receipt-value{font-family:'VT323',monospace;font-size:17px;color:var(--soil3);line-height:1.3;word-break:break-word}
+.receipt-note{background:rgba(46,139,122,.08);border:2px solid var(--teal);padding:10px 12px;font-family:'VT323',monospace;font-size:15px;color:var(--soil3);line-height:1.5}
+@media(max-width:900px){
+  .account-actions{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .bw-borrow-card{grid-template-columns:1fr}
+  .bw-borrow-icon{display:none}
+  .bw-borrow-side{align-items:stretch;min-width:0}
+  .bw-fine-note{text-align:left}
+}
+@media(max-width:520px){
+  .receipt-grid{grid-template-columns:1fr}
+}
 </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -464,9 +499,10 @@ tr.row-overdue:hover{background:rgba(192,57,43,.18)!important}
   </div>
   <div class="hdr-right" style="margin-left:auto">
     <nav style="display:flex;align-items:stretch;border-right:2px solid rgba(255,255,255,.1);margin-right:10px">
-      <a class="nbtn on" onclick="goPage('home',this)">Home</a>
-      <a class="nbtn" onclick="goPage('library',this)">Library</a>
-      <a class="nbtn admin-only" onclick="goPage('admin',this)">Admin</a>
+      <a class="nbtn on" data-page="home" onclick="goPage('home',this)">Home</a>
+      <a class="nbtn" id="user-dashboard-nav" data-page="dashboard" style="display:none" onclick="goPage('dashboard',this)">My Dashboard</a>
+      <a class="nbtn" data-page="library" onclick="goPage('library',this)">Library</a>
+      <a class="nbtn admin-only" data-page="admin" onclick="goPage('admin',this)">Admin</a>
     </nav>
     <div class="gsearch-wrap" style="position:relative">
       <input class="gsearch-inp" id="gsearch" placeholder="🔍 search..." oninput="globalSearch(this.value)" onblur="setTimeout(()=>document.getElementById('gsearch-results').classList.remove('show'),200)"/>
@@ -499,8 +535,9 @@ tr.row-overdue:hover{background:rgba(192,57,43,.18)!important}
       <div style="display:flex;justify-content:space-between"><span>Returned:</span><strong id="ap-returned">0</strong></div>
       <div style="display:flex;justify-content:space-between"><span>eBooks Bought:</span><strong id="ap-paid">0</strong></div>
     </div>
-    <div style="border-top:2px solid var(--cream2);padding-top:8px;display:flex;gap:6px">
-      <button class="pbtn g" style="font-size:6px;flex:1" onclick="goPage('library',document.querySelectorAll('.nbtn')[1]);toggleAccountPanel()">Browse Books</button>
+    <div class="account-actions">
+      <button class="pbtn g" style="font-size:6px;flex:1" onclick="goPage('dashboard',document.getElementById('user-dashboard-nav'));toggleAccountPanel()">Dashboard</button>
+      <button class="pbtn b" style="font-size:6px;flex:1" onclick="goPage('library',document.querySelector('.nbtn[data-page=&quot;library&quot;]'));toggleAccountPanel()">Browse Books</button>
       <button class="pbtn r" style="font-size:6px;flex:1" onclick="toggleAccountPanel();logout()">Logout</button>
     </div>
   </div>
@@ -521,41 +558,13 @@ tr.row-overdue:hover{background:rgba(192,57,43,.18)!important}
     <span class="alert-banner-icon">⚠️</span>
     <span id="overdue-alert-msg">You have overdue books!</span>
   </div>
-  <div id="bw-dashboard" style="display:none" class="bw-dash">
-    <div class="bw-dash-title"><span>🌸</span> My Borrowing Dashboard</div>
-    <div class="bw-cards">
-      <div class="bw-card teal"><span class="bw-card-num" id="bw-active">0</span><div class="bw-card-lbl">Active Borrows</div></div>
-      <div class="bw-card red"><span class="bw-card-num" id="bw-overdue">0</span><div class="bw-card-lbl">Overdue</div></div>
-      <div class="bw-card"><span class="bw-card-num" id="bw-returned">0</span><div class="bw-card-lbl">Returned</div></div>
-      <div class="bw-card"><span class="bw-card-num" id="bw-paid">0</span><div class="bw-card-lbl">eBooks Bought</div></div>
-    </div>
-    <!-- Active borrows -->
-    <div id="bw-borrow-list" style="display:none;margin-top:12px;border-top:2px solid var(--cream2);padding-top:10px">
-      <div style="font-size:6px;color:var(--soil2);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase">🍀 My Active Borrows</div>
-      <div id="bw-borrows-inner"></div>
-    </div>
-    <!-- eBook Library -->
-    <div id="bw-ebook-list" style="display:none;margin-top:12px;border-top:2px solid var(--cream2);padding-top:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px">
-        <div style="font-size:6px;color:var(--soil2);letter-spacing:1px;text-transform:uppercase">🌙 My eBook Library</div>
-        <div style="font-family:'VT323',monospace;font-size:14px;background:var(--grass);color:white;padding:3px 10px;border:2px solid var(--soil3)">✓ Lifetime Access</div>
+  <div id="home-user-summary" style="display:none;background:var(--cream);border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:14px;margin-bottom:18px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div>
+        <div style="font-size:7px;color:var(--soil2);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px">🌸 Your Reading Snapshot</div>
+        <div style="font-family:'VT323',monospace;font-size:17px;color:var(--soil3)">Keep browsing here, then manage borrowed books, overdue fines, and owned eBooks in your dashboard.</div>
       </div>
-      <div style="font-family:'VT323',monospace;font-size:15px;color:var(--teal2);background:rgba(46,139,122,.08);border:2px solid var(--teal);padding:8px 12px;margin-bottom:12px;line-height:1.5">
-        📚 These are <strong>your books</strong>. You can read or download them anytime — you've already paid for them!
-      </div>
-      <!-- Library search & filter -->
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
-        <input class="pinput" id="lib-bw-search" placeholder="🔍 Search your library..." oninput="filterBwLibrary()"
-          style="flex:1;min-width:140px;font-family:'VT323',monospace;font-size:15px;padding:7px 10px"/>
-        <select class="fsel" id="lib-bw-sort" onchange="filterBwLibrary()" style="font-size:13px;padding:6px 8px;width:auto">
-          <option value="date-desc">Newest First</option>
-          <option value="date-asc">Oldest First</option>
-          <option value="title-asc">Title A→Z</option>
-          <option value="title-desc">Title Z→A</option>
-        </select>
-      </div>
-      <div id="bw-ebooks-inner"></div>
-      <div id="bw-lib-empty" style="display:none;text-align:center;padding:20px;font-family:'VT323',monospace;font-size:18px;color:var(--wood2)">🔍 No books match your search.</div>
+      <button class="pbtn g" style="font-size:6px;padding:9px 12px" onclick="goPage('dashboard',document.getElementById('user-dashboard-nav'))">Open My Dashboard</button>
     </div>
   </div>
   <div class="cpanel">
@@ -571,7 +580,7 @@ tr.row-overdue:hover{background:rgba(192,57,43,.18)!important}
       <div class="ccard dig" id="cdig" onclick="openType('Digital')">
         <span class="cicon">🌙</span>
         <div class="clabel">eBooks</div>
-        <div class="csub">Buy &amp; download</div>
+        <div class="csub">Buy &amp; read anytime</div>
         <div class="ccnt" id="cnt-dig">— titles</div>
         <span class="cavail" id="avail-dig">— available now</span>
       </div>
@@ -587,6 +596,44 @@ tr.row-overdue:hover{background:rgba(192,57,43,.18)!important}
     <div style="background:var(--cream);border:3px solid var(--soil3);box-shadow:4px 4px 0 var(--soil3);padding:14px">
       <div style="font-size:6px;color:var(--soil2);letter-spacing:1px;margin-bottom:12px;text-transform:uppercase">📊 Library At a Glance</div>
       <div id="home-glance" style="font-family:'VT323',monospace;font-size:16px;color:var(--soil3);display:flex;flex-direction:column;gap:6px"></div>
+    </div>
+  </div>
+</div>
+
+<!-- USER DASHBOARD -->
+<div id="page-dashboard" class="page">
+  <div id="bw-dashboard" style="display:none" class="bw-dash">
+    <div class="bw-dash-title"><span>🌸</span> My Dashboard</div>
+    <div class="bw-cards">
+      <div class="bw-card teal"><span class="bw-card-num" id="bw-active">0</span><div class="bw-card-lbl">Active Borrows</div></div>
+      <div class="bw-card red"><span class="bw-card-num" id="bw-overdue">0</span><div class="bw-card-lbl">Overdue</div></div>
+      <div class="bw-card"><span class="bw-card-num" id="bw-returned">0</span><div class="bw-card-lbl">Returned</div></div>
+      <div class="bw-card"><span class="bw-card-num" id="bw-paid">0</span><div class="bw-card-lbl">eBooks Bought</div></div>
+    </div>
+    <div id="bw-borrow-list" style="display:none;margin-top:12px;border-top:2px solid var(--cream2);padding-top:10px">
+      <div style="font-size:6px;color:var(--soil2);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase">🍀 Borrowed Physical Books</div>
+      <div id="bw-borrows-inner"></div>
+    </div>
+    <div id="bw-ebook-list" style="display:none;margin-top:12px;border-top:2px solid var(--cream2);padding-top:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:6px">
+        <div style="font-size:6px;color:var(--soil2);letter-spacing:1px;text-transform:uppercase">🌙 Bought eBooks</div>
+        <div style="font-family:'VT323',monospace;font-size:14px;background:var(--grass);color:white;padding:3px 10px;border:2px solid var(--soil3)">✓ Lifetime Access</div>
+      </div>
+      <div style="font-family:'VT323',monospace;font-size:15px;color:var(--teal2);background:rgba(46,139,122,.08);border:2px solid var(--teal);padding:8px 12px;margin-bottom:12px;line-height:1.5">
+        📚 These are <strong>your books</strong>. Open them here or use your favorite reader anytime — access is already yours.
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;align-items:center">
+        <input class="pinput" id="lib-bw-search" placeholder="🔍 Search your library..." oninput="filterBwLibrary()"
+          style="flex:1;min-width:140px;font-family:'VT323',monospace;font-size:15px;padding:7px 10px"/>
+        <select class="fsel" id="lib-bw-sort" onchange="filterBwLibrary()" style="font-size:13px;padding:6px 8px;width:auto">
+          <option value="date-desc">Newest First</option>
+          <option value="date-asc">Oldest First</option>
+          <option value="title-asc">Title A→Z</option>
+          <option value="title-desc">Title Z→A</option>
+        </select>
+      </div>
+      <div id="bw-ebooks-inner"></div>
+      <div id="bw-lib-empty" style="display:none;text-align:center;padding:20px;font-family:'VT323',monospace;font-size:18px;color:var(--wood2)">🔍 No books match your search.</div>
     </div>
   </div>
 </div>
@@ -1168,6 +1215,7 @@ let currentUserId = null;
 let currentUserName = '';
 let currentUserEmail = '';
 let currentUserContact = '';
+let lastBorrowReceipt = null;
 let sfMode = 'title';
 let pageHist = [];
 let pendingEbookId = null;
@@ -1190,14 +1238,25 @@ async function api(endpoint, method='GET', body=null){
 
 /* ══ LOAD ALL DATA ══ */
 async function loadAll(){
+  const isUser = currentRole === 'user' && !!currentUserId;
   const [bk, mem, bil, bor, adm] = await Promise.all([
     api('books.php'),
-    api('members.php'),
-    currentRole === 'user' && currentUserId
+    currentRole === 'admin'
+      ? api('members.php')
+      : Promise.resolve({ success: true, data: [] }),
+    isUser
       ? api('billing.php?user_id=' + currentUserId)
-      : api('billing.php'),
-    api('borrows.php'),
-    api('admins.php'),
+      : currentRole === 'admin'
+        ? api('billing.php')
+        : Promise.resolve({ success: true, data: [] }),
+    isUser
+      ? api('borrows.php?user_id=' + currentUserId)
+      : currentRole === 'admin'
+        ? api('borrows.php')
+        : Promise.resolve({ success: true, data: [] }),
+    currentRole === 'admin'
+      ? api('admins.php')
+      : Promise.resolve({ success: true, data: [] }),
   ]);
   BOOKS          = bk.data   || [];
   MEMBERS        = mem.data  || [];
@@ -1465,7 +1524,11 @@ function launchApp(){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('main-header').style.display='grid';
   document.getElementById('app').style.display='block';
+  const userDashNav = document.getElementById('user-dashboard-nav');
+  const homeUserSummary = document.getElementById('home-user-summary');
   if(currentRole==='admin'){
+    userDashNav.style.display='none';
+    homeUserSummary.style.display='none';
     document.getElementById('role-badge').style.display='inline-block';
     document.getElementById('user-chip').style.display='none';
     document.getElementById('role-badge').textContent='🍄 Admin';
@@ -1480,6 +1543,8 @@ function launchApp(){
     document.getElementById('user-avatar').textContent = currentUserName?currentUserName[0].toUpperCase():'🌸';
     document.getElementById('welcome-msg').textContent='✨ Welcome to AizeChive!';
     document.querySelectorAll('.admin-only').forEach(el=>el.style.display='none');
+    userDashNav.style.display='flex';
+    homeUserSummary.style.display='block';
   }
   initCounts(); renderAll(); showOverdueAlerts();
   if(currentRole==='user') renderBwDash();
@@ -1502,6 +1567,8 @@ async function logout(){
   document.getElementById('page-home').classList.add('on');
   document.querySelectorAll('.nbtn').forEach(b=>b.classList.remove('on'));
   document.querySelector('.nbtn').classList.add('on');
+  document.getElementById('user-dashboard-nav').style.display='none';
+  document.getElementById('home-user-summary').style.display='none';
   document.getElementById('backbtn').classList.remove('show');
   BOOKS=[]; MEMBERS=[]; BILLING=[]; BORROW_RECORDS=[]; ADMINS=[];
 }
@@ -1527,14 +1594,14 @@ function goPage(name, btn){
   pageHist.push(name);
   if(name==='library'){ renderRecent(); renderCatBars(); }
   if(name==='admin'){ renderAdminStats(); showOverdueAlerts(); }
+  if(name==='dashboard'){ renderBwDash(); }
 }
 function goBack(){
   pageHist.pop();
   const prev = pageHist.length?pageHist[pageHist.length-1]:'home';
   pageHist = [];
-  const nl = document.querySelectorAll('.nbtn');
-  const ns = ['home','library','admin'];
-  goPage(prev, nl[ns.indexOf(prev)]);
+  const btn = document.querySelector(`.nbtn[data-page="${prev}"]`) || document.querySelector('.nbtn[data-page="home"]');
+  goPage(prev, btn);
 }
 
 /* ══ GLOBAL SEARCH ══ */
@@ -1546,9 +1613,9 @@ function globalSearch(q){
   BOOKS.filter(b=>b.title.toLowerCase().includes(ql)||b.author.toLowerCase().includes(ql))
     .slice(0,4).forEach(b=>results.push({icon:b.type==='Physical'?'🍀':'🌙',title:b.title,sub:b.author+' · '+b.stat,action:()=>{ openType(b.type); }}));
   MEMBERS.filter(m=>m.name.toLowerCase().includes(ql)||m.email.toLowerCase().includes(ql))
-    .slice(0,2).forEach(m=>results.push({icon:'🌻',title:m.name,sub:m.email,action:()=>{ if(currentRole==='admin'){ const nl=document.querySelectorAll('.nbtn');goPage('admin',nl[2]);swAdmin('ap-mem',document.querySelector('.atab:nth-child(4)')); }}}));
+    .slice(0,2).forEach(m=>results.push({icon:'🌻',title:m.name,sub:m.email,action:()=>{ if(currentRole==='admin'){ goPage('admin',document.querySelector('.nbtn[data-page="admin"]'));swAdmin('ap-mem',document.querySelector('.atab:nth-child(4)')); }}}));
   BORROW_RECORDS.filter(r=>r.name.toLowerCase().includes(ql)||r.book.toLowerCase().includes(ql))
-    .slice(0,2).forEach(r=>results.push({icon:'🎀',title:r.book,sub:r.name+' · '+r.stat,action:()=>{ if(currentRole==='admin'){ const nl=document.querySelectorAll('.nbtn');goPage('admin',nl[2]); }}}));
+    .slice(0,2).forEach(r=>results.push({icon:'🎀',title:r.book,sub:r.name+' · '+r.stat,action:()=>{ if(currentRole==='admin'){ goPage('admin',document.querySelector('.nbtn[data-page="admin"]')); }}}));
   if(!results.length){ box.innerHTML='<div class="gs-none">No results for "'+q+'"</div>'; box.classList.add('show'); return; }
   box.innerHTML = results.map((r,i)=>`<div class="gs-item" onclick="gsResults[${i}].action();document.getElementById('gsearch').value='';document.getElementById('gsearch-results').classList.remove('show')"><span class="gs-item-icon">${r.icon}</span><div><div class="gs-item-title">${r.title}</div><div class="gs-item-sub">${r.sub}</div></div></div>`).join('');
   window.gsResults = results;
@@ -1557,8 +1624,7 @@ function globalSearch(q){
 
 /* ══ CHOOSER ══ */
 function openType(type){
-  const nl = document.querySelectorAll('.nbtn');
-  goPage('library', nl[1]);
+  goPage('library', document.querySelector('.nbtn[data-page="library"]'));
   showFilt(type);
   setTimeout(()=>document.getElementById('filt-wrap').scrollIntoView({behavior:'smooth',block:'start'}), 80);
 }
@@ -1894,6 +1960,95 @@ async function saveBorrow(){
 }
 
 /* ══ BORROW DETAIL (admin) ══ */
+function showBorrowReceipt(){
+  if(!lastBorrowReceipt) return;
+  document.getElementById('brc-ref').textContent = lastBorrowReceipt.receipt_no || '-';
+  document.getElementById('brc-book').textContent = lastBorrowReceipt.book_title || '-';
+  document.getElementById('brc-name').textContent = lastBorrowReceipt.borrower_name || '-';
+  document.getElementById('brc-email').textContent = lastBorrowReceipt.email || '-';
+  document.getElementById('brc-contact').textContent = lastBorrowReceipt.contact || '-';
+  document.getElementById('brc-borrowed').textContent = lastBorrowReceipt.date_borrowed || '-';
+  document.getElementById('brc-due').textContent = lastBorrowReceipt.due_date || '-';
+  document.getElementById('brc-status').textContent = lastBorrowReceipt.status || 'Active';
+  openM('modal-borrow-receipt');
+}
+
+function printBorrowReceipt(){
+  if(!lastBorrowReceipt) return;
+  const receiptHtml = `
+    <html>
+      <head>
+        <title>Borrow Receipt</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 24px; color: #222; }
+          .wrap { max-width: 720px; margin: 0 auto; border: 2px solid #333; padding: 24px; }
+          h1 { font-size: 22px; margin: 0 0 8px; }
+          .ref { font-weight: bold; margin: 12px 0 18px; }
+          .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+          .item { border: 1px solid #999; padding: 10px; }
+          .label { font-size: 11px; text-transform: uppercase; color: #666; margin-bottom: 6px; }
+          .value { font-size: 16px; }
+          .note { margin-top: 16px; padding: 12px; border: 1px solid #999; background: #f7f7f7; }
+        </style>
+      </head>
+      <body>
+        <div class="wrap">
+          <h1>AizeChive Borrow Receipt</h1>
+          <div>Present this receipt at the library counter for release and verification.</div>
+          <div class="ref">Receipt No: ${lastBorrowReceipt.receipt_no || 'â€”'}</div>
+          <div class="grid">
+            <div class="item"><div class="label">Book Title</div><div class="value">${lastBorrowReceipt.book_title || 'â€”'}</div></div>
+            <div class="item"><div class="label">Borrower</div><div class="value">${lastBorrowReceipt.borrower_name || 'â€”'}</div></div>
+            <div class="item"><div class="label">Email</div><div class="value">${lastBorrowReceipt.email || 'â€”'}</div></div>
+            <div class="item"><div class="label">Contact</div><div class="value">${lastBorrowReceipt.contact || 'â€”'}</div></div>
+            <div class="item"><div class="label">Borrow Date</div><div class="value">${lastBorrowReceipt.date_borrowed || 'â€”'}</div></div>
+            <div class="item"><div class="label">Due Date</div><div class="value">${lastBorrowReceipt.due_date || 'â€”'}</div></div>
+          </div>
+          <div class="note">Status: ${lastBorrowReceipt.status || 'Active'}</div>
+        </div>
+        <script>window.print();<\/script>
+      </body>
+    </html>
+  `;
+  const printWin = window.open('', '_blank', 'width=860,height=720');
+  if(!printWin) return;
+  printWin.document.open();
+  printWin.document.write(receiptHtml);
+  printWin.document.close();
+}
+
+saveBorrow = async function(){
+  const n=v('bw-name'), e=v('bw-email'), c=v('bw-contact'), d=v('bw-due');
+  const bookId=parseInt(document.getElementById('modal-borrow').dataset.bookId||0);
+  if(!n||!e||!c||!d){ toast('Please fill all fields!','er'); return; }
+  const today=new Date().toISOString().split('T')[0];
+  const res=await api('borrows.php','POST',{
+    action:'borrow', user_id:currentUserId||null,
+    book_id:bookId, borrower_name:n, email:e, contact:c,
+    date_borrowed:today, due_date:d
+  });
+  if(res.success){
+    const book = BOOKS.find(x=>x.id===bookId);
+    lastBorrowReceipt = {
+      receipt_no: res.data?.receipt_no || ('BRW-' + new Date().getFullYear() + '-' + String(res.data?.id || 0).padStart(5,'0')),
+      book_title: res.data?.book_title || book?.title || document.getElementById('bw-book').value,
+      borrower_name: res.data?.borrower_name || n,
+      email: res.data?.email || e,
+      contact: res.data?.contact || c,
+      date_borrowed: res.data?.date_borrowed || today,
+      due_date: res.data?.due_date || d,
+      status: res.data?.status || 'Active',
+    };
+    await loadAll();
+    renderAll();
+    closeM('modal-borrow');
+    showBorrowReceipt();
+    toast('ðŸŽ€ Borrowed! Due: '+d,'ok');
+  } else {
+    toast(res.error||'Borrow failed!','er');
+  }
+}
+
 function openBorrowDetail(id){
   const r=BORROW_RECORDS.find(x=>x.id===id); if(!r) return;
   document.getElementById('bd-id').value=r.id;
@@ -2400,28 +2555,30 @@ function renderBwDash(){
     const today=new Date().toISOString().split('T')[0];
     if(activeBorrows.length){
       borrowEl.style.display='block';
-      document.getElementById('bw-borrows-inner').innerHTML=activeBorrows.map(r=>{
+      document.getElementById('bw-borrows-inner').innerHTML=`<div class="bw-borrows-stack">${activeBorrows.map(r=>{
         const isOd=r.stat==='Overdue';
         const daysLeft=r.stat==='Active'?Math.ceil((new Date(r.due)-new Date(today))/(1000*60*60*24)):null;
         const fine=isOd?Math.floor((new Date(today)-new Date(r.due))/(1000*60*60*24))*5:0;
-        return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:${isOd?'linear-gradient(135deg,rgba(192,57,43,.12),rgba(192,57,43,.06))':'linear-gradient(135deg,rgba(90,173,42,.1),rgba(90,173,42,.04))'};border:2px solid ${isOd?'var(--red)':'var(--grass)'};margin-bottom:6px">
-          <span style="font-size:22px;flex-shrink:0">${isOd?'⚠️':'🍀'}</span>
-          <div style="flex:1;min-width:0">
-            <div style="font-family:'Press Start 2P',monospace;font-size:6px;color:var(--soil3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${r.book}</div>
-            <div style="font-family:'VT323',monospace;font-size:14px;color:var(--wood);margin-top:2px">Borrowed: ${r.borrowed}</div>
-            <div style="display:flex;align-items:center;gap:8px;margin-top:3px;flex-wrap:wrap">
-              <span style="font-family:'VT323',monospace;font-size:14px;color:${isOd?'var(--red)':daysLeft!==null&&daysLeft<=3?'var(--orange)':'var(--soil2)'}">Due: <strong>${r.due}</strong></span>
-              ${daysLeft!==null?`<span style="font-family:'VT323',monospace;font-size:13px;color:${daysLeft<=3?'var(--red)':'var(--grass)'}">(${daysLeft}d left)</span>`:''}
-              ${isOd?`<span style="font-family:'Press Start 2P',monospace;font-size:5px;color:var(--red)">₱${fine} fine</span>`:''}
+        return `<div class="bw-borrow-card ${isOd?'overdue':''}">
+          <span class="bw-borrow-icon">${isOd?'⚠️':'🍀'}</span>
+          <div class="bw-borrow-main">
+            <div class="bw-borrow-title">${r.book}</div>
+            <div class="bw-borrow-meta">Borrowed: ${r.borrowed}</div>
+            <div class="bw-borrow-due">
+              <span class="bw-borrow-meta" style="color:${isOd?'var(--red)':daysLeft!==null&&daysLeft<=3?'var(--orange)':'var(--soil2)'}">Due: <strong>${r.due}</strong></span>
+              ${daysLeft!==null?`<span class="bw-borrow-meta" style="color:${daysLeft<=3?'var(--red)':'var(--grass)'}">(${daysLeft}d left)</span>`:''}
+              ${isOd?`<span class="bw-fine-note">₱${fine} fine</span>`:''}
             </div>
           </div>
-          <span class="bdg ${isOd?'od':'ac'}" style="font-size:5px;padding:3px 7px;flex-shrink:0">${r.stat}</span>
-          ${isOd?`<button class="pbtn r" style="font-size:5px;padding:5px 10px;margin-top:4px;width:100%"
-            onclick="openFinePayment(${r.id},'${r.book.replace(/'/g,'&apos;')}',${fine})">
-            💸 PAY FINE — ₱${fine}
-          </button>`:''}
+          <div class="bw-borrow-side">
+            <span class="bdg ${isOd?'od':'ac'}" style="font-size:5px;padding:3px 7px">${r.stat}</span>
+            ${isOd?`<button class="pbtn r" style="font-size:5px;padding:6px 10px"
+              onclick="openFinePayment(${r.id},'${r.book.replace(/'/g,'&apos;')}',${fine})">
+              💸 Pay Fine - ₱${fine}
+            </button>`:''}
+          </div>
         </div>`;
-      }).join('');
+      }).join('')}</div>`;
     } else { borrowEl.style.display='none'; }
   }
 
@@ -2481,11 +2638,11 @@ function renderBwDash(){
             ${bookUrl ? `
             <button class="pbtn gold bw-read-btn" data-idx="${idx}"
               style="width:100%;font-size:6px;padding:8px;text-align:center">
-              📖 READ eBOOK
+              📖 READ NOW
             </button>
             <button class="pbtn t bw-dl-btn" data-idx="${idx}"
               style="width:100%;font-size:6px;padding:8px;text-align:center">
-              📥 DOWNLOAD
+              📥 SAVE FILE
             </button>` : `
             <div style="font-family:'VT323',monospace;font-size:15px;color:var(--wood2);text-align:center;padding:6px">
               📎 File not linked yet
@@ -2518,7 +2675,7 @@ document.addEventListener('click',e=>{
     if(card) openEbookReader(card.bookUrl, card.bookTitle, card.ref);
     return;
   }
-  // eBook DOWNLOAD button
+  // eBook save-file button
   const dlBtn = e.target.closest('.bw-dl-btn');
   if(dlBtn){
     const card = window._ebCards?.[dlBtn.dataset.idx];
@@ -2788,7 +2945,7 @@ async function submitFinePay() {
   const ref  = document.getElementById('fp-ref').value.trim();
   const mode = document.getElementById('fp-mode').value;
   const id   = _fineRecordId;
-  if (!ref) { toast('Please enter a reference / transaction number!', 'er'); return; }
+  if (!ref && mode !== 'Cash') { toast('Please enter the payment reference from your receipt.', 'er'); return; }
   const rec = BORROW_RECORDS.find(r => r.id === id);
   if (!rec) { toast('Record not found.', 'er'); return; }
   const today = new Date().toISOString().split('T')[0];
@@ -2803,7 +2960,7 @@ async function submitFinePay() {
   if (res.success) {
     closeM('modal-fine'); await loadAll();
     renderBwDash(); renderBilling(); renderAdminStats();
-    toast('✅ Fine payment submitted! Ref: ' + ref, 'ok');
+    toast('✅ Fine payment submitted!' + (ref ? ' Ref: ' + ref : ''), 'ok');
   } else { toast(res.error || 'Failed to submit fine payment.', 'er'); }
 }
 
@@ -2855,14 +3012,13 @@ function previewCover(input) {
       <span style="font-family:'VT323',monospace;font-size:13px;color:rgba(255,255,255,.6)" id="er-ref">Ref: —</span>
     </div>
     <div style="display:flex;gap:6px;align-items:center">
-      <button class="pbtn bl" style="font-size:6px;padding:6px 10px" onclick="openEbookExternal()">🔗 Download</button>
       <button class="ibtn" style="background:var(--red);color:white" onclick="closeEbookReader()">✕</button>
     </div>
   </div>
   <!-- Loading -->
   <div id="er-loading" style="display:flex;align-items:center;justify-content:center;padding:48px;flex-direction:column;gap:14px;background:var(--cream)">
     <span style="font-size:40px;animation:spin 1s steps(4) infinite">📖</span>
-    <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--soil3)">Loading eBook...</div>
+    <div style="font-family:'Press Start 2P',monospace;font-size:7px;color:var(--soil3)">Opening eBook...</div>
     <div style="font-family:'VT323',monospace;font-size:15px;color:var(--wood)" id="er-loading-sub">Please wait...</div>
   </div>
   <!-- EPUB Viewer -->
@@ -2878,16 +3034,13 @@ function previewCover(input) {
       <button class="pbtn b" style="font-size:7px;padding:8px 16px" onclick="epubNext()">Next ▶</button>
     </div>
   </div>
-  <!-- Fallback download card -->
+  <!-- Fallback access card -->
   <div id="er-fallback" style="display:none;padding:36px 24px;text-align:center;background:var(--cream)">
     <div style="font-size:52px;margin-bottom:14px">📚</div>
-    <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--soil3);margin-bottom:10px">eBook Ready!</div>
+    <div style="font-family:'Press Start 2P',monospace;font-size:8px;color:var(--soil3);margin-bottom:10px">Reader Needed</div>
     <div style="font-family:'VT323',monospace;font-size:17px;color:var(--wood);margin-bottom:22px;line-height:1.6">
-      Your eBook is available. Click below to<br>download and open it with your eBook reader.
+      This title works best in an EPUB reader.<br>Use <strong>Save File</strong> first, then open it in your preferred app.
     </div>
-    <button class="pbtn t" style="font-size:8px;padding:13px 22px;margin-bottom:12px" onclick="openEbookExternal()">
-      📥 Download eBook
-    </button>
     <div style="font-family:'VT323',monospace;font-size:14px;color:var(--wood2);margin-top:8px" id="er-url-display"></div>
     <div style="margin-top:16px;font-family:'VT323',monospace;font-size:14px;color:var(--wood2);background:var(--cream2);border:2px solid var(--soil3);padding:10px 14px;line-height:1.6">
       💡 To read .epub files, use:<br>
@@ -2902,11 +3055,44 @@ function previewCover(input) {
 </div>
 
 
+<div class="mbg" id="modal-borrow-receipt">
+<div class="mbox" style="width:min(92vw,560px)">
+  <div class="mhead"><span>ðŸ§¾ Borrow Receipt</span><button class="ibtn" style="background:var(--red);color:white" onclick="closeM('modal-borrow-receipt')">âœ•</button></div>
+  <div class="mbody">
+    <div class="receipt-box">
+      <div class="receipt-head">
+        <div>
+          <div class="receipt-title">Physical Book Borrowing Confirmed</div>
+          <div class="receipt-sub">Present this receipt at the library counter for release and verification.</div>
+        </div>
+        <div class="receipt-ref" id="brc-ref">â€”</div>
+      </div>
+      <div class="receipt-grid">
+        <div class="receipt-item"><div class="receipt-label">Book Title</div><div class="receipt-value" id="brc-book">â€”</div></div>
+        <div class="receipt-item"><div class="receipt-label">Borrower</div><div class="receipt-value" id="brc-name">â€”</div></div>
+        <div class="receipt-item"><div class="receipt-label">Email</div><div class="receipt-value" id="brc-email">â€”</div></div>
+        <div class="receipt-item"><div class="receipt-label">Contact</div><div class="receipt-value" id="brc-contact">â€”</div></div>
+        <div class="receipt-item"><div class="receipt-label">Borrow Date</div><div class="receipt-value" id="brc-borrowed">â€”</div></div>
+        <div class="receipt-item"><div class="receipt-label">Due Date</div><div class="receipt-value" id="brc-due">â€”</div></div>
+      </div>
+      <div class="receipt-note">
+        <strong>Status:</strong> <span id="brc-status">Active</span><br>
+        Keep this receipt for reference until the book has been released at the counter.
+      </div>
+    </div>
+  </div>
+  <div class="mfoot">
+    <button class="pbtn b" onclick="printBorrowReceipt()">ðŸ“¥ Print Receipt</button>
+    <button class="pbtn g" onclick="closeM('modal-borrow-receipt')">Done</button>
+  </div>
+</div>
+</div>
+
 <!-- FINE PAYMENT MODAL -->
 <div class="mbg" id="modal-fine">
 <div class="mbox" style="width:min(96vw,420px)">
   <div class="mhead" style="background:var(--red)">
-    <span style="font-size:8px">💸 Pay Overdue Fine</span>
+    <span style="font-size:8px">💸 Settle Overdue Fine</span>
     <button class="ibtn" style="background:rgba(0,0,0,.3);color:white" onclick="closeM('modal-fine')">✕</button>
   </div>
   <div style="padding:20px;background:var(--cream);display:flex;flex-direction:column;gap:12px">
@@ -2915,23 +3101,23 @@ function previewCover(input) {
       <div style="font-family:'Press Start 2P',monospace;font-size:14px;color:var(--red)" id="fp-amount">₱0</div>
       <div style="font-family:'VT323',monospace;font-size:13px;color:var(--wood2);margin-top:4px">Total Fine Due</div>
     </div>
-    <div><label class="flbl">Payment Method</label>
+    <div><label class="flbl">Payment Channel</label>
       <select class="fsel" id="fp-mode" style="width:100%">
         <option value="GCash">💚 GCash</option><option value="Maya">💜 Maya</option>
         <option value="Cash">💵 Cash (In-person)</option><option value="BPI">🏦 BPI</option><option value="BDO">🏦 BDO</option>
       </select>
     </div>
-    <div class="frow"><label class="flbl">Reference / Transaction Number</label>
-      <input class="finp" id="fp-ref" placeholder="Enter ref # after payment..."/>
+    <div class="frow"><label class="flbl">Payment Reference</label>
+      <input class="finp" id="fp-ref" placeholder="Enter the reference from your receipt or leave blank for cash..."/>
     </div>
     <div style="background:rgba(46,139,122,.08);border:2px solid var(--teal);padding:8px 12px;font-family:'VT323',monospace;font-size:14px;color:var(--soil3);line-height:1.6">
-      📌 After submitting, your fine will be recorded as <strong>Paid</strong>.
+      📌 Use the reference number from your GCash, Maya, or bank receipt. If you pay in person with cash, you can leave this blank.
     </div>
     <input type="hidden" id="fp-record-id" value=""/>
   </div>
   <div class="mfoot">
     <button class="pbtn b" onclick="closeM('modal-fine')">Cancel</button>
-    <button class="pbtn r" onclick="submitFinePay()">💸 Submit Fine Payment</button>
+    <button class="pbtn r" onclick="submitFinePay()">💸 Submit Payment Record</button>
   </div>
 </div>
 </div>

@@ -84,7 +84,21 @@ elseif ($method === 'POST' && $action !== 'return') {
         $db->prepare("UPDATE books SET Status='Borrowed' WHERE idBooks=?")->execute([$bookId]);
     }
 
-    ok(['id' => $db->lastInsertId()], 'Borrowed successfully! Due: ' . $due);
+    $borrowId = (int)$db->lastInsertId();
+    $receiptNo = 'BRW-' . date('Y') . '-' . str_pad((string)$borrowId, 5, '0', STR_PAD_LEFT);
+
+    ok([
+        'id' => $borrowId,
+        'receipt_no' => $receiptNo,
+        'book_id' => $bookId,
+        'book_title' => $book['Title'],
+        'borrower_name' => $name,
+        'email' => $email,
+        'contact' => $contact,
+        'date_borrowed' => date('Y-m-d'),
+        'due_date' => $due,
+        'status' => 'Active',
+    ], 'Borrowed successfully! Due: ' . $due);
 }
 
 // ── POST — Mark Returned ──────────────────────────────────────
